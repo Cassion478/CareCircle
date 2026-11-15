@@ -14,7 +14,7 @@ describe("Phase 7: Comprehensive Application Routes & Architecture", () => {
     { name: "Family Care Circle", file: "src/app/care-circle/page.tsx", path: "/care-circle" },
     { name: "Smart Alerts", file: "src/app/alerts/page.tsx", path: "/alerts" },
     { name: "Health Analytics", file: "src/app/analytics/page.tsx", path: "/analytics" },
-    { name: "Caregiver Demo Portal", file: "src/app/caregiver/page.tsx", path: "/caregiver" },
+    { name: "Caregiver Portal", file: "src/app/caregiver/page.tsx", path: "/caregiver" },
     { name: "Healthcare Profile", file: "src/app/profile/page.tsx", path: "/profile" },
     { name: "Route Protection Middleware", file: "src/lib/supabase/middleware.ts", path: "middleware" },
   ];
@@ -80,7 +80,7 @@ describe("Phase 7: Simulated Two-User Security & Cross-Patient Isolation Policy 
     assert.equal(evaluateRLS(patientA.id, prefB.patient_id, "UPDATE"), false);
   });
 
-  test("Unauthenticated visitor receives Demo fallback data and cannot access patient records", () => {
+  test("Unauthenticated visitor is denied access to all patient records", () => {
     const unauthSession = null;
     assert.equal(evaluateRLS(unauthSession, patientA.id), false);
     assert.equal(evaluateRLS(unauthSession, patientB.id), false);
@@ -228,6 +228,7 @@ describe("Phase 7: End-to-End User Journeys (A to G)", () => {
         "/care-circle",
         "/alerts",
         "/analytics",
+        "/caregiver",
         "/profile",
       ];
 

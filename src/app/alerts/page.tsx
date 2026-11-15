@@ -15,7 +15,6 @@ import {
   Phone,
   Settings,
   ShieldAlert,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,12 +29,11 @@ import {
   EscalationStatus,
 } from "@/types";
 import {
-  DEMO_ALERTS,
   formatAlertTime,
 } from "@/lib/alerts";
 
 function AlertsContent() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [alerts, setAlerts] = useState<DbAlert[]>([]);
   const [, setPreferences] = useState<DbAlertPreferences | null>(null);
   const [careCircleMembers, setCareCircleMembers] = useState<DbCareCircleMember[]>([]);
@@ -133,7 +131,7 @@ function AlertsContent() {
       if (user) {
         await loadData(user.id);
       } else {
-        setAlerts(DEMO_ALERTS);
+        setAlerts([]);
         setIsLoading(false);
       }
     })();
@@ -157,7 +155,7 @@ function AlertsContent() {
             : a
         )
       );
-      showSuccess("Alert acknowledged (Demo mode).");
+      showSuccess("Alert acknowledged.");
       return;
     }
 
@@ -198,7 +196,7 @@ function AlertsContent() {
             : a
         )
       );
-      showSuccess("Alert snoozed for 10 minutes (Demo mode).");
+      showSuccess("Alert snoozed for 10 minutes.");
       return;
     }
 
@@ -279,31 +277,9 @@ function AlertsContent() {
     const nowIso = new Date().toISOString();
 
     if (!user) {
-      const demoNewAlert: DbAlert = {
-        id: `demo-assist-${Date.now()}`,
-        patient_id: "demo-shanti-devi",
-        type: "assistance",
-        title: `Assistance Request: ${assistTitle.trim()}`,
-        message: `${assistNotes.trim() || "Assistance requested by patient."}${
-          contact ? ` Preferred Contact: ${contact.member_name}${contact.phone_number ? ` (${contact.phone_number})` : ""}.` : ""
-        }`,
-        related_medication_id: null,
-        related_appointment_id: null,
-        scheduled_for: nowIso,
-        status: "pending",
-        acknowledged_at: null,
-        snoozed_until: null,
-        escalation_status: escalationStatus,
-        created_at: nowIso,
-        updated_at: nowIso,
-      };
-
-      setAlerts((prev) => [demoNewAlert, ...prev]);
       setIsSubmittingAssist(false);
       setIsAssistModalOpen(false);
-      setAssistTitle("");
-      setAssistNotes("");
-      showSuccess("Assistance request recorded (Demo mode).");
+      setErrorMessage("Please sign in to submit an assistance request.");
       return;
     }
 
@@ -345,7 +321,7 @@ function AlertsContent() {
     e.preventDefault();
     if (!user) {
       setIsPrefModalOpen(false);
-      showSuccess("Preferences saved in demo mode.");
+      showSuccess("Preferences saved.");
       return;
     }
 
@@ -448,19 +424,6 @@ function AlertsContent() {
             </Button>
           </div>
         </div>
-
-        {/* Demo Mode Notice */}
-        {!user && !authLoading && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200 flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="text-sm space-y-1">
-              <p className="font-bold">Viewing Demonstration Alerts for Smt. Shanti Devi</p>
-              <p className="text-xs text-amber-800 dark:text-amber-300">
-                You are currently in guest preview mode. Sign in to your patient account to configure real reminder alerts and personal care circle assistance.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Toast Notification */}
         {successMessage && (

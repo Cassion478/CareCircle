@@ -21,7 +21,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
-import { DEMO_PATIENT, DEMO_ADHERENCE } from "@/lib/demo-data";
 import { AdherenceStats } from "@/types";
 
 interface TimeSlotMetric {
@@ -35,28 +34,14 @@ interface TimeSlotMetric {
 
 type TimeFilterOption = "7d" | "30d" | "90d";
 
-const DEMO_STATS_BY_TIMEFRAME: Record<TimeFilterOption, AdherenceStats> = {
-  "7d": {
-    ...DEMO_ADHERENCE,
-    weeklyPercentage: 94,
-    takenThisWeek: 22,
-    totalScheduledThisWeek: 24,
-    currentStreakDays: 6,
-  },
-  "30d": {
-    ...DEMO_ADHERENCE,
-    weeklyPercentage: 96,
-    takenThisWeek: 92,
-    totalScheduledThisWeek: 96,
-    currentStreakDays: 14,
-  },
-  "90d": {
-    ...DEMO_ADHERENCE,
-    weeklyPercentage: 95,
-    takenThisWeek: 274,
-    totalScheduledThisWeek: 288,
-    currentStreakDays: 28,
-  },
+const DEFAULT_EMPTY_STATS: AdherenceStats = {
+  weeklyPercentage: null,
+  takenThisWeek: 0,
+  totalScheduledThisWeek: 0,
+  currentStreakDays: 0,
+  takenToday: 0,
+  totalScheduledToday: 0,
+  dailyProgress: [],
 };
 
 export default function AnalyticsPage() {
@@ -64,25 +49,21 @@ export default function AnalyticsPage() {
   const [timeFilter, setTimeFilter] = useState<TimeFilterOption>("30d");
   const [patientStats, setPatientStats] = useState<AdherenceStats | null>(null);
   const [appointmentSummary, setAppointmentSummary] = useState({
-    total: 6,
-    completed: 5,
-    upcoming: 1,
+    total: 0,
+    completed: 0,
+    upcoming: 0,
     attendanceRate: 100,
   });
   const [timeOfDayMetrics] = useState<TimeSlotMetric[]>([
-    { slot: "morning", name: "Morning Routine (8:00 AM)", icon: Sun, taken: 14, total: 14, percentage: 100 },
-    { slot: "afternoon", name: "Afternoon Routine (1:30 PM)", icon: Clock, taken: 6, total: 7, percentage: 86 },
-    { slot: "evening", name: "Evening Routine (8:00 PM)", icon: Sunset, taken: 13, total: 14, percentage: 93 },
-    { slot: "night", name: "Night Routine (10:00 PM)", icon: Moon, taken: 7, total: 7, percentage: 100 },
+    { slot: "morning", name: "Morning Routine (8:00 AM)", icon: Sun, taken: 0, total: 0, percentage: 100 },
+    { slot: "afternoon", name: "Afternoon Routine (1:30 PM)", icon: Clock, taken: 0, total: 0, percentage: 100 },
+    { slot: "evening", name: "Evening Routine (8:00 PM)", icon: Sunset, taken: 0, total: 0, percentage: 100 },
+    { slot: "night", name: "Night Routine (10:00 PM)", icon: Moon, taken: 0, total: 0, percentage: 100 },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const patientName = user
-    ? profile?.fullName || user.user_metadata?.full_name || "Patient"
-    : DEMO_PATIENT.name;
-
-  const isDemo = !user;
-  const stats: AdherenceStats = user && patientStats ? patientStats : DEMO_STATS_BY_TIMEFRAME[timeFilter];
+  const patientName = profile?.fullName || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Patient");
+  const stats: AdherenceStats = patientStats || DEFAULT_EMPTY_STATS;
 
   useEffect(() => {
     let isCancelled = false;
@@ -120,7 +101,7 @@ export default function AnalyticsPage() {
           if (logs && logs.length > 0) {
             const taken = logs.filter((l) => l.status === "taken").length;
             const total = logs.length;
-            const pct = total > 0 ? Math.round((taken / total) * 100) : 100;
+            const pct = total > 0 ? Math.round((taken / total) * 100) : null;
             const dailyMedsCount = Math.max(1, meds?.length || 1);
             const calculatedStreak = Math.min(Math.floor(taken / dailyMedsCount), daysToFetch);
 
@@ -129,17 +110,17 @@ export default function AnalyticsPage() {
               takenThisWeek: taken,
               totalScheduledThisWeek: total,
               currentStreakDays: calculatedStreak,
-              dailyProgress: DEMO_ADHERENCE.dailyProgress,
+              dailyProgress: [],
             });
           } else {
             // Patient has no logs yet in this window
             setPatientStats({
-              weeklyPercentage: 100,
+              weeklyPercentage: null,
               currentStreakDays: 0,
               takenThisWeek: 0,
               totalScheduledThisWeek: 0,
               missedThisWeek: 0,
-              dailyProgress: DEMO_ADHERENCE.dailyProgress,
+              dailyProgress: [],
             });
           }
 
@@ -206,15 +187,9 @@ export default function AnalyticsPage() {
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-[#26352E] tracking-tight">
                     Health & Routine Analytics
                   </h1>
-                  {isDemo ? (
-                    <Badge variant="warning" className="font-bold">
-                      Demo Data (Smt. Shanti Devi)
-                    </Badge>
-                  ) : (
-                    <Badge variant="success" className="font-bold">
-                      Verified Patient Data ({patientName})
-                    </Badge>
-                  )}
+                  <Badge variant="success" className="font-bold">
+                    Patient Records ({patientName})
+                  </Badge>
                 </div>
                 <p className="text-base text-[#66736B] mt-1">
                   Medication consistency, adherence trends, and medical appointment summaries for {patientName}.
@@ -501,28 +476,37 @@ export default function AnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-7 gap-2 text-center">
-                    {(stats.dailyProgress || DEMO_ADHERENCE.dailyProgress || []).map((day, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-2">
-                        <span className="text-xs font-bold text-[#66736B]">{day.day}</span>
-                        <div
-                          className={`w-10 h-16 rounded-xl flex items-end justify-center p-1 border transition-all ${
-                            day.percentage === 100
-                              ? "bg-[#EAF2EC] border-[#C8D9CD]"
-                              : "bg-amber-50 border-amber-200"
-                          }`}
-                        >
+                  {stats.dailyProgress && stats.dailyProgress.length > 0 ? (
+                    <div className="grid grid-cols-7 gap-2 text-center">
+                      {stats.dailyProgress.map((day, idx) => (
+                        <div key={idx} className="flex flex-col items-center gap-2">
+                          <span className="text-xs font-bold text-[#66736B]">{day.day}</span>
                           <div
-                            className={`w-full rounded-lg ${
-                              day.percentage === 100 ? "bg-[#477A62]" : "bg-amber-500"
+                            className={`w-10 h-16 rounded-xl flex items-end justify-center p-1 border transition-all ${
+                              day.percentage === 100
+                                ? "bg-[#EAF2EC] border-[#C8D9CD]"
+                                : "bg-amber-50 border-amber-200"
                             }`}
-                            style={{ height: `${day.percentage}%` }}
-                          />
+                          >
+                            <div
+                              className={`w-full rounded-lg ${
+                                day.percentage === 100 ? "bg-[#477A62]" : "bg-amber-500"
+                              }`}
+                              style={{ height: `${day.percentage}%` }}
+                            />
+                          </div>
+                          <span className="text-[11px] font-bold text-[#26352E]">{day.percentage}%</span>
                         </div>
-                        <span className="text-[11px] font-bold text-[#26352E]">{day.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center space-y-1">
+                      <p className="text-sm font-bold text-[#26352E]">No daily records recorded in this window</p>
+                      <p className="text-xs text-[#66736B]">
+                        Mark scheduled medications as Taken on My Day to view daily consistency.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="mt-6 pt-4 border-t border-[#E3EAE5] flex items-center justify-between text-xs font-semibold text-[#66736B]">
                     <div className="flex items-center gap-2">

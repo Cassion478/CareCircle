@@ -4,14 +4,13 @@ import { useState } from "react";
 import { HelpCircle, Check, X, PhoneCall, MessageSquareHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Medication, UserProfile } from "@/types";
-import { DEMO_PATIENT } from "@/lib/demo-data";
 
 interface HelpModalProps {
   medication: Medication | null;
   isOpen: boolean;
   onClose: () => void;
   onHelpRequested: (reason: string) => void;
-  patient?: UserProfile;
+  patient?: UserProfile | null;
 }
 
 export function HelpModal({
@@ -19,15 +18,15 @@ export function HelpModal({
   isOpen,
   onClose,
   onHelpRequested,
-  patient = DEMO_PATIENT,
+  patient,
 }: HelpModalProps) {
   const [selectedReason, setSelectedReason] = useState<string>("");
   const [submitted, setSubmitted] = useState<boolean>(false);
 
   if (!isOpen || !medication) return null;
 
-  const contactName = patient.emergencyContact?.name || "Family";
-  const contactPhone = patient.emergencyContact?.phone;
+  const contactName = patient?.emergencyContact?.name || "Family";
+  const contactPhone = patient?.emergencyContact?.phone;
   const hasPhone = Boolean(contactPhone && contactPhone !== "None configured");
 
   const reasons = [

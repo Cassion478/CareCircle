@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  Sparkles,
   Edit2,
   Trash2,
   User,
@@ -20,7 +19,6 @@ import {
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { DbAppointment, AppointmentStatus } from "@/types";
@@ -30,10 +28,9 @@ import {
   formatAppointmentTime,
   sortAppointments,
 } from "@/lib/appointments";
-import { DEMO_APPOINTMENTS } from "@/lib/demo-data";
 
 function AppointmentsContent() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<DbAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -329,59 +326,33 @@ function AppointmentsContent() {
           </div>
         )}
 
-        {/* Unauthenticated Demo Notice */}
-        {!user && !authLoading && (
-          <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
-              <div>
-                <h2 className="text-base font-bold text-amber-900 dark:text-amber-200">
-                  Preview Demonstration Mode
-                </h2>
-                <p className="text-sm text-amber-800 dark:text-amber-300 mt-1">
-                  You are previewing sample clinic appointments for Smt. Shanti Devi. Sign in to
-                  your account to schedule and manage your real appointments.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-500 transition-colors shadow-sm"
-            >
-              Sign In to Schedule
-            </Link>
-          </div>
-        )}
-
         {/* Tab Controls (Upcoming vs Past) */}
-        {user && (
-          <div className="flex items-center gap-2 p-1.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-2xl w-fit">
-            <button
-              type="button"
-              onClick={() => setActiveTab("upcoming")}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "upcoming"
-                  ? "bg-white text-teal-800 shadow-sm dark:bg-slate-900 dark:text-teal-300"
-                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400"
-              }`}
-            >
-              Upcoming Visits ({upcomingApts.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("past")}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "past"
-                  ? "bg-white text-teal-800 shadow-sm dark:bg-slate-900 dark:text-teal-300"
-                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400"
-              }`}
-            >
-              Past & Completed ({pastApts.length})
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 p-1.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-2xl w-fit">
+          <button
+            type="button"
+            onClick={() => setActiveTab("upcoming")}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "upcoming"
+                ? "bg-white text-teal-800 shadow-sm dark:bg-slate-900 dark:text-teal-300"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400"
+            }`}
+          >
+            Upcoming Visits ({upcomingApts.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("past")}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "past"
+                ? "bg-white text-teal-800 shadow-sm dark:bg-slate-900 dark:text-teal-300"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400"
+            }`}
+          >
+            Past & Completed ({pastApts.length})
+          </button>
+        </div>
 
-        {/* Content Section: Authenticated vs Demo */}
+        {/* Content Section: Appointments List */}
         {isLoading ? (
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-600 border-r-transparent mb-3" />
@@ -389,7 +360,7 @@ function AppointmentsContent() {
               Loading your appointment records...
             </p>
           </div>
-        ) : user ? (
+        ) : (
           <div>
             {displayedApts.length === 0 ? (
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 sm:p-14 text-center border border-dashed border-slate-300 dark:border-slate-800 space-y-4">
@@ -548,41 +519,6 @@ function AppointmentsContent() {
                 })}
               </div>
             )}
-          </div>
-        ) : (
-          /* Demo Fallback Cards for Visitors */
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {DEMO_APPOINTMENTS.map((apt) => (
-              <div
-                key={apt.id}
-                className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 shadow-sm space-y-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <Badge variant="secondary" className="text-[10px]">
-                      Demo
-                    </Badge>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-lg">
-                      {apt.doctorName}
-                    </h3>
-                    <p className="text-xs text-teal-600 font-semibold">{apt.specialty}</p>
-                  </div>
-                  <div className="text-right text-xs font-bold text-slate-600">
-                    <div>{apt.date}</div>
-                    <div className="text-teal-600">{apt.time}</div>
-                  </div>
-                </div>
-                <div className="text-xs text-slate-500 flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                  <span>{apt.location}</span>
-                </div>
-                {apt.notes && (
-                  <p className="text-xs text-slate-600 italic bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl">
-                    &ldquo;{apt.notes}&rdquo;
-                  </p>
-                )}
-              </div>
-            ))}
           </div>
         )}
       </div>

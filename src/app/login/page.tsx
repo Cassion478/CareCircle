@@ -188,14 +188,14 @@ function LoginForm() {
             </p>
           </div>
 
-          {/* Demo Mode Notice */}
+          {/* Configuration Notice */}
           {!supabaseConfigured && (
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-900 flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-bold">Demonstration Mode</p>
+                <p className="font-bold">Configuration Notice</p>
                 <p>
-                  Supabase keys are not set in <code className="font-mono bg-amber-100 px-1 py-0.5 rounded">.env.local</code>. You can explore the full demo experience freely.
+                  Supabase connection is not configured in <code className="font-mono bg-amber-100 px-1 py-0.5 rounded">.env.local</code>. Please set your Supabase URL and Publishable Key.
                 </p>
               </div>
             </div>
@@ -313,21 +313,13 @@ function LoginForm() {
               </Link>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm pt-2">
+            <div className="flex items-center justify-center text-sm pt-2">
               <Link
                 href="/caregiver"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#477A62] hover:text-[#3B6551] hover:underline"
               >
                 <ShieldCheck className="h-4 w-4" />
                 Caregiver or family member? Open Family Portal
-              </Link>
-
-              <Link
-                href="/my-day"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#66736B] hover:text-[#26352E] hover:underline"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-                Explore Demo Mode (Smt. Shanti Devi)
               </Link>
             </div>
           </div>

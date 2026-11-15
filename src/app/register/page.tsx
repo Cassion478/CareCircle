@@ -189,9 +189,9 @@ export default function RegisterPage() {
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-900 flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-bold">Demonstration Mode</p>
+                <p className="font-bold">Configuration Notice</p>
                 <p>
-                  Supabase keys are not set in <code className="font-mono bg-amber-100 px-1 py-0.5 rounded">.env.local</code>.
+                  Supabase connection is not configured in <code className="font-mono bg-amber-100 px-1 py-0.5 rounded">.env.local</code>. Please set your Supabase URL and Publishable Key.
                 </p>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function RegisterPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Smt. Shanti Devi"
+                  placeholder="e.g. Eleanor Vance"
                   className="w-full pl-11 pr-4 py-3 text-base rounded-xl border border-[#D9E2DC] bg-[#F8FAF8] text-[#26352E] placeholder-[#8F9E94] focus:outline-none focus:ring-2 focus:ring-[#477A62] focus:border-[#477A62] focus:bg-white transition-colors"
                 />
               </div>

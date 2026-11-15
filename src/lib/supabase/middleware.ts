@@ -60,6 +60,7 @@ export async function updateSession(request: NextRequest) {
     "/alerts",
     "/analytics",
     "/profile",
+    "/caregiver",
   ];
 
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
