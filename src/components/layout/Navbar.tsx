@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeartPulse, Bell, Calendar, Pill, Users, SunMedium } from "lucide-react";
+import { HeartPulse, Bell, Calendar, Pill, Users, SunMedium, ShieldCheck } from "lucide-react";
 import { DEMO_PATIENT } from "@/lib/demo-data";
 
 export function Navbar() {
@@ -17,19 +17,26 @@ export function Navbar() {
                 CareCircle
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
-                Elderly Healthcare Companion
+                Healthcare Companion
               </span>
             </div>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-5 text-sm font-semibold text-slate-600 dark:text-slate-300">
+          <nav className="hidden lg:flex items-center gap-4 text-sm font-semibold text-slate-600 dark:text-slate-300">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-teal-700 dark:text-teal-400 font-bold bg-teal-50 dark:bg-teal-950/60 px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-1.5 text-teal-800 dark:text-teal-300 font-bold bg-teal-50 dark:bg-teal-950/60 px-3 py-1.5 rounded-lg"
             >
               <SunMedium className="h-4 w-4 text-amber-500" />
               My Day
+            </Link>
+            <Link
+              href="/caregiver"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <ShieldCheck className="h-4 w-4 text-teal-600" />
+              Family Portal
             </Link>
             <span className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed">
               <Pill className="h-4 w-4" />
@@ -41,7 +48,7 @@ export function Navbar() {
             </span>
             <span className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed">
               <Users className="h-4 w-4" />
-              Family Circle
+              Care Circle
             </span>
           </nav>
         </div>
@@ -54,7 +61,11 @@ export function Navbar() {
           </div>
 
           {/* Notification Icon */}
-          <div className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <div
+            className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Local Notifications"
+            aria-label="Local Notifications"
+          >
             <Bell className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-teal-600" />
           </div>
@@ -62,7 +73,7 @@ export function Navbar() {
           {/* Active Profile Pill */}
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white shadow-xs">
-              EC
+              SD
             </div>
             <div className="hidden md:flex flex-col text-left">
               <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight">

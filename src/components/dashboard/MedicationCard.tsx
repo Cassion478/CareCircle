@@ -34,18 +34,18 @@ export function MedicationCard({
   const isPending = medication.status === "pending";
 
   const handleSpeakInstructions = () => {
-    if ("speechSynthesis" in window) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      const text = `${medication.name}, ${medication.dosage}. Scheduled for ${medication.timeLabel}. Instructions: ${medication.instructions}`;
+      const text = `${medication.name}, dosage ${medication.dosage}. Scheduled for ${medication.timeLabel}. Instructions: ${medication.instructions}`;
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9; // Slightly slower for elderly comprehension
+      utterance.rate = 0.85; // Slower, comfortable speed for elderly listeners
       utterance.onstart = () => setIsPlayingAudio(true);
       utterance.onend = () => setIsPlayingAudio(false);
       utterance.onerror = () => setIsPlayingAudio(false);
       window.speechSynthesis.speak(utterance);
     } else {
       setIsPlayingAudio(true);
-      setTimeout(() => setIsPlayingAudio(false), 2500);
+      setTimeout(() => setIsPlayingAudio(false), 2000);
     }
   };
 
@@ -68,7 +68,7 @@ export function MedicationCard({
 
   return (
     <div
-      className={`relative rounded-2xl border transition-all duration-200 p-5 sm:p-6 shadow-sm ${
+      className={`relative rounded-2xl border transition-all duration-200 p-4 sm:p-6 shadow-sm ${
         isTaken
           ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900/60 dark:bg-emerald-950/20"
           : isPending
@@ -91,7 +91,7 @@ export function MedicationCard({
 
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-500 dark:text-slate-400">
+              <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-600 dark:text-slate-400">
                 <Clock className="h-3.5 w-3.5" />
                 {medication.timeLabel}
               </span>
@@ -103,14 +103,14 @@ export function MedicationCard({
                 </Badge>
               )}
               {isPending && (
-                <Badge variant="warning" className="gap-1 font-bold animate-pulse">
+                <Badge variant="warning" className="gap-1 font-bold">
                   Due Now
                 </Badge>
               )}
               {isSnoozed && (
                 <Badge variant="secondary" className="gap-1 font-bold text-purple-700 bg-purple-100">
                   <Clock className="h-3 w-3" />
-                  Snoozed 15m
+                  Snoozed (Next in 15 mins)
                 </Badge>
               )}
               {!isTaken && !isPending && !isSnoozed && (
@@ -125,7 +125,7 @@ export function MedicationCard({
               </span>
             </h3>
 
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
+            <p className="text-sm sm:text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed max-w-xl">
               {medication.instructions}
             </p>
 
@@ -137,37 +137,38 @@ export function MedicationCard({
             )}
 
             {isTaken && medication.lastTaken && (
-              <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 pt-1">
-                ✓ Recorded at {medication.lastTaken}
+              <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 pt-1">
+                ✓ Confirmed at {medication.lastTaken}
               </p>
             )}
           </div>
         </div>
 
-        {/* Listen Button (Senior Accessibility) */}
+        {/* Read Aloud Button (Senior Audio Accessibility) */}
         <button
           onClick={handleSpeakInstructions}
-          className={`self-start flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`self-start min-h-[40px] flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${
             isPlayingAudio
               ? "bg-teal-600 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+              : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
           }`}
-          title="Read instructions aloud"
+          title="Read medication instructions aloud"
+          aria-label={`Read aloud instructions for ${medication.name}`}
         >
-          <Volume2 className={`h-4 w-4 ${isPlayingAudio ? "animate-pulse" : ""}`} />
-          <span>{isPlayingAudio ? "Reading..." : "Read Aloud"}</span>
+          <Volume2 className={`h-4 w-4 ${isPlayingAudio ? "animate-pulse text-white" : "text-teal-600"}`} />
+          <span>{isPlayingAudio ? "Reading Aloud..." : "Read Aloud"}</span>
         </button>
       </div>
 
-      {/* Large Accessible Action Buttons */}
+      {/* Large Accessible Action Controls */}
       <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {!isTaken ? (
             <Button
               variant="primary"
               size="lg"
               onClick={() => onMarkTaken(medication.id)}
-              className="h-12 px-6 text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm hover:shadow-emerald-600/20 rounded-xl gap-2 active:scale-95 transition-transform"
+              className="min-h-[48px] px-6 text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm rounded-xl gap-2 active:scale-95 transition-transform"
             >
               <CheckCircle2 className="h-5 w-5" />
               Mark as Taken
@@ -175,12 +176,12 @@ export function MedicationCard({
           ) : (
             <Button
               variant="outline"
-              size="sm"
+              size="md"
               onClick={() => onMarkTaken(medication.id)}
-              className="text-xs text-slate-500 hover:text-slate-700 gap-1 rounded-lg"
+              className="min-h-[44px] text-xs sm:text-sm text-slate-600 hover:text-slate-900 gap-1.5 rounded-xl border-slate-300"
             >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Undo Taken
+              <RotateCcw className="h-4 w-4" />
+              Tap to Undo if Marked by Mistake
             </Button>
           )}
 
@@ -189,20 +190,20 @@ export function MedicationCard({
               variant="outline"
               size="md"
               onClick={() => onSnooze(medication.id)}
-              className="h-12 px-4 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl gap-1.5"
+              className="min-h-[48px] px-4 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl gap-1.5 border-slate-300"
             >
-              <Clock className="h-4 w-4" />
-              Snooze 15m
+              <Clock className="h-4 w-4 text-slate-500" />
+              Snooze 15 min
             </Button>
           )}
         </div>
 
         <button
           onClick={() => onOpenHelp(medication)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="min-h-[44px] inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
-          <HelpCircle className="h-4 w-4" />
-          Need Help?
+          <HelpCircle className="h-4 w-4 text-teal-600" />
+          Need Assistance?
         </button>
       </div>
     </div>

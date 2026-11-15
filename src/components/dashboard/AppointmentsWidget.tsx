@@ -12,7 +12,7 @@ export function AppointmentsWidget({ appointments }: AppointmentsWidgetProps) {
     <Card className="rounded-2xl">
       <CardHeader className="p-5 pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
             <Calendar className="h-5 w-5 text-teal-600" />
             Doctor Appointments
           </CardTitle>
@@ -27,28 +27,28 @@ export function AppointmentsWidget({ appointments }: AppointmentsWidgetProps) {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-slate-900 dark:text-white">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
                     {apt.doctorName}
                   </span>
-                  <span className="rounded bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-700 dark:bg-teal-950 dark:text-teal-300">
+                  <span className="rounded-md bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-700 dark:bg-teal-950 dark:text-teal-300">
                     {apt.specialty}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 pt-1">
-                  <span className="flex items-center gap-1 font-semibold text-teal-800 dark:text-teal-300">
+                <div className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300 pt-1">
+                  <span className="flex items-center gap-1.5 font-bold text-teal-800 dark:text-teal-300">
                     <Clock className="h-3.5 w-3.5" />
                     {apt.date} at {apt.time}
                   </span>
-                  <span className="flex items-center gap-1 text-slate-500">
-                    <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="flex items-center gap-1.5 text-slate-500">
+                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                     {apt.location}
                   </span>
                 </div>
 
                 {apt.notes && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 italic pt-1">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 italic pt-1">
                     &ldquo;{apt.notes}&rdquo;
                   </p>
                 )}
@@ -57,8 +57,9 @@ export function AppointmentsWidget({ appointments }: AppointmentsWidgetProps) {
               {apt.phone && (
                 <a
                   href={`tel:${apt.phone}`}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white transition-colors"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white transition-colors min-h-[40px] min-w-[40px]"
                   title="Call Clinic"
+                  aria-label={`Call ${apt.doctorName}`}
                 >
                   <Phone className="h-4 w-4" />
                 </a>
@@ -67,8 +68,8 @@ export function AppointmentsWidget({ appointments }: AppointmentsWidgetProps) {
           </div>
         ))}
 
-        <div className="rounded-xl border border-dashed border-slate-200 p-3 text-center text-xs text-slate-400 dark:border-slate-800">
-          Full Appointment Management & Scheduling coming in Phase 4
+        <div className="rounded-xl border border-dashed border-slate-200 p-3 text-center text-xs text-slate-500 dark:border-slate-800">
+          Scheduled clinic visits and reminders
         </div>
       </CardContent>
     </Card>
