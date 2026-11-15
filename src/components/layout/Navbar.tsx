@@ -71,10 +71,13 @@ export function Navbar() {
               <User className="h-4 w-4 text-teal-600" />
               Profile
             </Link>
-            <span className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed">
-              <Pill className="h-4 w-4" />
+            <Link
+              href="/medications"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Pill className="h-4 w-4 text-teal-600" />
               Medications
-            </span>
+            </Link>
             <span className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed">
               <Calendar className="h-4 w-4" />
               Appointments
@@ -90,7 +93,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {/* Phase Badge */}
           <div className="hidden sm:inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-950 dark:text-teal-300">
-            Phase 2: Auth & Profile
+            Phase 3: Medications
           </div>
 
           {/* Notification Icon */}
