@@ -166,7 +166,6 @@ export interface DbCareCircleMember {
   created_at: string;
   updated_at: string;
 }
-
 export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
 
 export interface DbAppointment {
@@ -179,6 +178,37 @@ export interface DbAppointment {
   appointment_time: string;
   notes: string | null;
   status: AppointmentStatus;
+  created_at: string;
+  updated_at: string;
+}
+// Phase 5: Smart Alerts & Escalation Types
+export type AlertType = "medication" | "appointment" | "assistance";
+export type AlertStatus = "pending" | "acknowledged" | "snoozed" | "resolved" | "cancelled";
+export type EscalationStatus = "not_required" | "waiting" | "escalated" | "cancelled";
+
+export interface DbAlert {
+  id: string;
+  patient_id: string;
+  type: AlertType;
+  title: string;
+  message: string;
+  related_medication_id?: string | null;
+  related_appointment_id?: string | null;
+  scheduled_for: string;
+  status: AlertStatus;
+  acknowledged_at?: string | null;
+  snoozed_until?: string | null;
+  escalation_status: EscalationStatus;
+  created_at: string;
+  updated_at: string;
+}
+export interface DbAlertPreferences {
+  id: string;
+  patient_id: string;
+  medication_reminders: boolean;
+  appointment_reminders: boolean;
+  assistance_escalation_enabled: boolean;
+  preferred_care_circle_contact_id?: string | null;
   created_at: string;
   updated_at: string;
 }
