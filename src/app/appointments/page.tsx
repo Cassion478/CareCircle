@@ -258,20 +258,20 @@ function AppointmentsContent() {
   const displayedApts = activeTab === "upcoming" ? sortAppointments(upcomingApts, true) : sortAppointments(pastApts, false);
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-16 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#F8FAF8] pb-16">
       {/* Top Breadcrumb Bar */}
-      <div className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="border-b border-[#E3EAE5] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-900 dark:text-teal-400 transition-colors"
+            href="/my-day"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#477A62] hover:text-[#3B6551] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to My Day Dashboard
           </Link>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-950 dark:text-teal-300">
-              Phase 4: Doctor Appointments
+            <span className="inline-flex items-center rounded-full bg-[#EAF2EC] px-3.5 py-1 text-xs font-bold text-[#26352E] border border-[#C8D9CD]">
+              Medical Schedule
             </span>
           </div>
         </div>
@@ -279,16 +279,16 @@ function AppointmentsContent() {
 
       <div className="mx-auto max-w-7xl space-y-8 px-4 pt-6 sm:px-6 lg:px-8">
         {/* Title & Action Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-[#E3EAE5] shadow-sm">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#477A62] uppercase tracking-wider">
               <Calendar className="h-4 w-4" />
               Medical Consultations
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#26352E]">
               Doctor Appointments & Visits
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-base text-[#66736B]">
               Keep track of clinic visits, diagnostic tests, and doctor checkups.
             </p>
           </div>
@@ -297,7 +297,7 @@ function AppointmentsContent() {
             <Button
               onClick={openAddModal}
               size="lg"
-              className="h-13 px-6 text-base font-bold bg-teal-600 hover:bg-teal-500 text-white rounded-2xl shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
+              className="h-13 px-6 text-base font-bold bg-[#477A62] hover:bg-[#3B6551] text-white rounded-2xl shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
             >
               <Plus className="h-5 w-5" />
               <span>Schedule New Visit</span>

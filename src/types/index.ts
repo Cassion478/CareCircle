@@ -145,7 +145,7 @@ export interface AdherenceStats {
   takenThisWeek: number;
   totalScheduledThisWeek: number;
   currentStreakDays: number;
-  weeklyPercentage: number;
+  weeklyPercentage: number | null;
   missedThisWeek?: number;
   dailyProgress?: DailyProgressItem[];
 }

@@ -395,20 +395,20 @@ function AlertsContent() {
   const pendingCount = alerts.filter((a) => a.status === "pending" || a.status === "snoozed").length;
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-16 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#F8FAF8] pb-16">
       {/* Top Breadcrumb Bar */}
-      <div className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="border-b border-[#E3EAE5] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-900 dark:text-teal-400 transition-colors"
+            href="/my-day"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#477A62] hover:text-[#3B6551] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to My Day Dashboard
           </Link>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-950 dark:text-teal-300">
-              Phase 5: Smart Alerts
+            <span className="inline-flex items-center rounded-full bg-[#EAF2EC] px-3.5 py-1 text-xs font-bold text-[#26352E] border border-[#C8D9CD]">
+              Alerts & Notifications
             </span>
           </div>
         </div>
@@ -416,16 +416,16 @@ function AlertsContent() {
 
       <div className="mx-auto max-w-7xl space-y-8 px-4 pt-6 sm:px-6 lg:px-8">
         {/* Title & Action Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-[#E3EAE5] shadow-sm">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#477A62] uppercase tracking-wider">
               <Bell className="h-4 w-4" />
               Proactive Health Notifications
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#26352E]">
               Alerts & Assistance Centre
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-base text-[#66736B]">
               Timely reminders for medications and clinic visits, with a direct patient assistance workflow.
             </p>
           </div>
@@ -434,14 +434,14 @@ function AlertsContent() {
             <Button
               variant="outline"
               onClick={() => setIsPrefModalOpen(true)}
-              className="h-12 px-4 rounded-2xl font-bold flex items-center gap-2 border-slate-300 dark:border-slate-700 cursor-pointer"
+              className="h-12 px-4 rounded-2xl font-bold flex items-center gap-2 border-[#D9E2DC] text-[#26352E] hover:bg-[#EAF2EC] cursor-pointer"
             >
-              <Settings className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              <Settings className="h-4 w-4 text-[#477A62]" />
               <span>Preferences</span>
             </Button>
             <Button
               onClick={() => setIsAssistModalOpen(true)}
-              className="h-12 px-6 rounded-2xl font-bold flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 cursor-pointer"
+              className="h-12 px-6 rounded-2xl font-bold flex items-center gap-2 bg-[#477A62] hover:bg-[#3B6551] text-white shadow-md cursor-pointer"
             >
               <HeartHandshake className="h-5 w-5" />
               <span>Request Assistance</span>
