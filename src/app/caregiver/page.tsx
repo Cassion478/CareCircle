@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -27,6 +27,7 @@ export default function CaregiverPortalPage() {
   const [medications, setMedications] = useState<DbMedication[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const nudgeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const patientName = profile?.fullName || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Patient");
   const patientPhone = profile?.phoneNumber || user?.user_metadata?.phone_number || profile?.emergencyContactPhone || "";
@@ -63,13 +64,15 @@ export default function CaregiverPortalPage() {
 
     return () => {
       isCancelled = true;
+      if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
     };
   }, [user]);
 
   const handleSendNudge = () => {
     setNudgeSent(true);
     setNudgeToast(true);
-    setTimeout(() => setNudgeToast(false), 4000);
+    if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
+    nudgeTimerRef.current = setTimeout(() => setNudgeToast(false), 4000);
   };
 
   return (

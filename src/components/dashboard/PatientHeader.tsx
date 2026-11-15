@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   PhoneCall,
   Calendar,
@@ -27,6 +27,7 @@ export function PatientHeader({
   const [mood, setMood] = useState<string>("Feeling Well");
   const [moodSaved, setMoodSaved] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<string>("Today's Healthcare Routine");
+  const moodTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,13 +40,17 @@ export function PatientHeader({
         })
       );
     }, 0);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (moodTimerRef.current) clearTimeout(moodTimerRef.current);
+    };
   }, []);
 
   const handleMoodSelect = (selectedMood: string) => {
     setMood(selectedMood);
     setMoodSaved(true);
-    setTimeout(() => setMoodSaved(false), 2000);
+    if (moodTimerRef.current) clearTimeout(moodTimerRef.current);
+    moodTimerRef.current = setTimeout(() => setMoodSaved(false), 2000);
   };
 
   return (

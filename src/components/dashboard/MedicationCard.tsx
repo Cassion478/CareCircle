@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Pill,
   CheckCircle2,
@@ -28,6 +28,14 @@ export function MedicationCard({
   onOpenHelp,
 }: MedicationCardProps) {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const isTaken = medication.status === "taken";
   const isSnoozed = medication.status === "snoozed";

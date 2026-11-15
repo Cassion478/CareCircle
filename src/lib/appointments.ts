@@ -1,4 +1,5 @@
 import { DbAppointment, Appointment, AppointmentStatus } from "@/types";
+import { formatTimeLabel } from "./medications";
 
 export interface AppointmentInput {
   title: string;
@@ -61,14 +62,7 @@ export function formatAppointmentDate(dateStr: string): string {
 
 export function formatAppointmentTime(timeStr: string): string {
   if (!timeStr) return "";
-  const [hourStr, minStr] = timeStr.split(":");
-  const hour = parseInt(hourStr, 10);
-  const min = minStr || "00";
-  if (isNaN(hour)) return timeStr;
-
-  const period = hour >= 12 ? "PM" : "AM";
-  const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
-  return `${formattedHour}:${min} ${period}`;
+  return formatTimeLabel(timeStr);
 }
 
 export function sortAppointments(

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, Phone, PhoneCall, X, Heart, Shield, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,15 @@ export function EmergencyModal({
   onSimulateAlert,
   patient,
 }: EmergencyModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const hasEmergencyContact = Boolean(
