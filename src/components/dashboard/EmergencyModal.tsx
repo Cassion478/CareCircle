@@ -1,17 +1,30 @@
 "use client";
 
-import { AlertTriangle, Phone, PhoneCall, X, Heart, Shield } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, Phone, PhoneCall, X, Heart, Shield, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DEMO_PATIENT } from "@/lib/demo-data";
+import { UserProfile } from "@/types";
 
 interface EmergencyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSimulateAlert: () => void;
+  patient?: UserProfile;
 }
 
-export function EmergencyModal({ isOpen, onClose, onSimulateAlert }: EmergencyModalProps) {
+export function EmergencyModal({
+  isOpen,
+  onClose,
+  onSimulateAlert,
+  patient = DEMO_PATIENT,
+}: EmergencyModalProps) {
   if (!isOpen) return null;
+
+  const hasEmergencyContact = Boolean(
+    patient.emergencyContact?.phone &&
+    patient.emergencyContact.phone !== "None configured"
+  );
 
   return (
     <div
@@ -38,35 +51,61 @@ export function EmergencyModal({ isOpen, onClose, onSimulateAlert }: EmergencyMo
               Immediate Help & Emergency
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              Direct assistance options for {DEMO_PATIENT.name}
+              Direct assistance options for {patient.name}
             </p>
           </div>
         </div>
 
         <div className="space-y-4 my-5">
           {/* Primary Family Contact Option */}
-          <div className="rounded-2xl border-2 border-teal-500/40 bg-teal-50/70 p-4 dark:border-teal-800 dark:bg-teal-950/40">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300">
-                  Primary Family Contact
-                </span>
-                <p className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-                  {DEMO_PATIENT.emergencyContact.name}
-                </p>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                  {DEMO_PATIENT.emergencyContact.relationship} • {DEMO_PATIENT.emergencyContact.phone}
-                </p>
+          {hasEmergencyContact ? (
+            <div className="rounded-2xl border-2 border-teal-500/40 bg-teal-50/70 p-4 dark:border-teal-800 dark:bg-teal-950/40">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+                    Primary Family Contact
+                  </span>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+                    {patient.emergencyContact.name}
+                  </p>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                    {patient.emergencyContact.relationship} • {patient.emergencyContact.phone}
+                  </p>
+                </div>
+                <a
+                  href={`tel:${patient.emergencyContact.phone}`}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md hover:bg-teal-700 transition-colors"
+                  title={`Call ${patient.emergencyContact.name}`}
+                >
+                  <PhoneCall className="h-6 w-6" />
+                </a>
               </div>
-              <a
-                href={`tel:${DEMO_PATIENT.emergencyContact.phone}`}
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md hover:bg-teal-700 transition-colors"
-                title={`Call ${DEMO_PATIENT.emergencyContact.name}`}
-              >
-                <PhoneCall className="h-6 w-6" />
-              </a>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-800 dark:bg-amber-950/40">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                    Family Contact Missing
+                  </span>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                    No family emergency contact set
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Add a primary contact in your profile for instant one-touch dialing.
+                  </p>
+                </div>
+                <Link
+                  href="/profile"
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shrink-0"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>Add</span>
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* National Emergency Helpline (India 112 & 108) */}
           <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-4 dark:border-rose-900/60 dark:bg-rose-950/30">

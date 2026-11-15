@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2, User, Sparkles } from "lucide-react";
 import { PatientHeader } from "@/components/dashboard/PatientHeader";
 import { MedicationTimeline } from "@/components/dashboard/MedicationTimeline";
 import { AppointmentsWidget } from "@/components/dashboard/AppointmentsWidget";
@@ -16,13 +17,46 @@ import {
   DEMO_CAREGIVERS,
   DEMO_ADHERENCE,
 } from "@/lib/demo-data";
-import { Medication, AdherenceStats } from "@/types";
+import { Medication, AdherenceStats, UserProfile } from "@/types";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function MyDayDashboard() {
+  const { user, profile } = useAuth();
   const [medications, setMedications] = useState<Medication[]>(DEMO_MEDICATIONS);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [helpMed, setHelpMed] = useState<Medication | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Security & Data Isolation:
+  // When logged in, strictly derive patient profile from authenticated user.
+  // Never leak or mix demo patient details (Smt. Shanti Devi / Pooja) into an authenticated session.
+  const activePatient: UserProfile = user
+    ? {
+        id: user.id,
+        name: profile?.fullName || user.user_metadata?.full_name || "Patient",
+        email: user.email || "",
+        role: "patient",
+        phone: profile?.phoneNumber || user.user_metadata?.phone_number || undefined,
+        avatarUrl: profile?.avatarUrl || undefined,
+        emergencyContact: {
+          name:
+            profile?.emergencyContactName ||
+            user.user_metadata?.emergency_contact_name ||
+            "Primary Family Contact",
+          relationship:
+            profile?.emergencyContactRelationship ||
+            user.user_metadata?.emergency_contact_relationship ||
+            "Family Member",
+          phone:
+            profile?.emergencyContactPhone ||
+            user.user_metadata?.emergency_contact_phone ||
+            "None configured",
+        },
+        conditions: [],
+        allergies: profile?.allergies || [],
+        createdAt: profile?.createdAt || user.created_at || new Date().toISOString(),
+      }
+    : DEMO_PATIENT;
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -78,7 +112,13 @@ export default function MyDayDashboard() {
   };
 
   const handleHelpRequested = (reason: string) => {
-    showToast(`Assistance note recorded locally: "${reason}". Call Pooja if urgent.`);
+    const contactName = activePatient.emergencyContact.name;
+    const phone = activePatient.emergencyContact.phone;
+    if (phone && phone !== "None configured") {
+      showToast(`Assistance note recorded locally: "${reason}". Contact ${contactName} if urgent.`);
+    } else {
+      showToast(`Assistance note recorded locally: "${reason}". National helpline 112 is available.`);
+    }
   };
 
   const handleSimulateAlert = () => {
@@ -111,24 +151,38 @@ export default function MyDayDashboard() {
           </div>
         )}
 
-        {/* Demo Mode Notice */}
+        {/* Phase 2 Context Banner */}
         <div className="border-b border-slate-200 bg-teal-50/60 dark:border-slate-800 dark:bg-slate-900/60">
           <div className="mx-auto flex max-w-7xl flex-col sm:flex-row sm:items-center justify-between gap-1.5 px-4 py-2.5 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-2">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-bold text-teal-800 dark:text-teal-400">Phase 1 Demo Experience:</span>
-              <span>Confirmations and snooze states are stored in local session memory and will reset upon page refresh.</span>
+              <span className="font-bold text-teal-800 dark:text-teal-400">Phase 2:</span>
+              {user ? (
+                <span>Signed in as <strong className="text-slate-900 dark:text-white">{activePatient.name}</strong>. Personal profile active.</span>
+              ) : (
+                <span>Exploring with demo profile. Routine updates are kept in session memory.</span>
+              )}
             </div>
-            <span className="text-[11px] text-slate-500">
-              Demo Patient: {DEMO_PATIENT.name} • Persistent database storage arrives in Phase 3
-            </span>
+            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+              {user ? (
+                <Link href="/profile" className="text-teal-700 dark:text-teal-400 font-bold hover:underline flex items-center gap-1">
+                  <User className="h-3 w-3" /> Edit Healthcare Profile
+                </Link>
+              ) : (
+                <Link href="/login" className="text-teal-700 dark:text-teal-400 font-bold hover:underline flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" /> Sign in for personal profile
+                </Link>
+              )}
+              <span>•</span>
+              <span>Medication database persistence arrives in Phase 3</span>
+            </div>
           </div>
         </div>
 
         <div className="mx-auto max-w-7xl space-y-8 px-4 pt-6 sm:px-6 lg:px-8">
           {/* Patient Greeting & Assistance Header */}
           <PatientHeader
-            patient={DEMO_PATIENT}
+            patient={activePatient}
             onOpenEmergency={() => setEmergencyOpen(true)}
             takenCount={takenCount}
             totalCount={medications.length}
@@ -160,6 +214,7 @@ export default function MyDayDashboard() {
           isOpen={emergencyOpen}
           onClose={() => setEmergencyOpen(false)}
           onSimulateAlert={handleSimulateAlert}
+          patient={activePatient}
         />
 
         <HelpModal

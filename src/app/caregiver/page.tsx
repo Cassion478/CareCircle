@@ -54,7 +54,7 @@ export default function CaregiverPortalPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Elderly &ldquo;My Day&rdquo; Experience
           </Link>
-          <Badge variant="secondary">Supporting Family Portal (Phase 1 Demo)</Badge>
+          <Badge variant="secondary">Supporting Family Portal (Phase 2 Demo)</Badge>
         </div>
       </div>
 

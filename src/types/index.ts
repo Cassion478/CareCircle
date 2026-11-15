@@ -8,6 +8,23 @@ export interface EmergencyContact {
   phone: string;
 }
 
+export interface PatientProfile {
+  id: string;
+  fullName: string;
+  email?: string;
+  dateOfBirth?: string;
+  phoneNumber?: string;
+  gender?: string;
+  avatarUrl?: string;
+  bloodGroup?: string;
+  allergies?: string[];
+  emergencyContactName?: string;
+  emergencyContactRelationship?: string;
+  emergencyContactPhone?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
