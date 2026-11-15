@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { CheckCircle2, User, Sparkles } from "lucide-react";
+import { CheckCircle2, User, Sparkles, Pill, Plus } from "lucide-react";
 import { PatientHeader } from "@/components/dashboard/PatientHeader";
 import { MedicationTimeline } from "@/components/dashboard/MedicationTimeline";
 import { AppointmentsWidget } from "@/components/dashboard/AppointmentsWidget";
@@ -17,15 +17,20 @@ import {
   DEMO_CAREGIVERS,
   DEMO_ADHERENCE,
 } from "@/lib/demo-data";
-import { Medication, AdherenceStats, UserProfile } from "@/types";
+import { Medication, AdherenceStats, UserProfile, DbMedication } from "@/types";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { createClient } from "@/lib/supabase/client";
+import { buildTodaySchedule } from "@/lib/medications";
 
 export default function MyDayDashboard() {
   const { user, profile } = useAuth();
   const [medications, setMedications] = useState<Medication[]>(DEMO_MEDICATIONS);
+  const [userDbMeds, setUserDbMeds] = useState<DbMedication[]>([]);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [helpMed, setHelpMed] = useState<Medication | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLoadingMeds, setIsLoadingMeds] = useState(false);
 
   // Security & Data Isolation:
   // When logged in, strictly derive patient profile from authenticated user.
@@ -62,62 +67,219 @@ export default function MyDayDashboard() {
     setToastMessage(message);
     setTimeout(() => {
       setToastMessage(null);
-    }, 4000);
+    }, 4500);
   };
 
-  const handleMarkTaken = (id: string) => {
+  // Load today's persistent medications & dose logs from Supabase
+  const loadPersistentDoses = useCallback(async (userId: string) => {
+    setIsLoadingMeds(true);
+    try {
+      const supabase = createClient();
+
+      // Fetch active medications
+      const { data: meds, error: medsErr } = await supabase
+        .from("medications")
+        .select("*")
+        .eq("patient_id", userId)
+        .eq("is_active", true);
+
+      if (medsErr) {
+        console.warn("Could not load medications:", medsErr.message);
+        setIsLoadingMeds(false);
+        return;
+      }
+
+      setUserDbMeds(meds || []);
+
+      if (meds && meds.length > 0) {
+        // Fetch today's logs
+        const todayStr = new Date().toISOString().split("T")[0];
+        const { data: logs, error: logsErr } = await supabase
+          .from("medication_dose_logs")
+          .select("*")
+          .eq("patient_id", userId)
+          .gte("scheduled_for", `${todayStr}T00:00:00.000Z`)
+          .lte("scheduled_for", `${todayStr}T23:59:59.999Z`);
+
+        if (logsErr) {
+          console.warn("Could not load dose logs:", logsErr.message);
+        }
+
+        const todaySchedule = buildTodaySchedule(meds, logs || [], new Date());
+        setMedications(todaySchedule);
+      } else {
+        // User has no custom medications yet
+        setMedications([]);
+      }
+    } catch (err) {
+      console.warn("Error loading daily schedule:", err);
+    } finally {
+      setIsLoadingMeds(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    void (async () => {
+      await Promise.resolve();
+      if (isCancelled) return;
+
+      if (user) {
+        await loadPersistentDoses(user.id);
+      } else {
+        // Unauthenticated visitor: use demo medications in local state
+        setMedications(DEMO_MEDICATIONS);
+        setUserDbMeds([]);
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user, loadPersistentDoses]);
+
+  // Mark Dose as Taken or Undo Taken
+  const handleMarkTaken = async (id: string) => {
+    const targetMed = medications.find((m) => m.id === id);
+    if (!targetMed) return;
+
+    const isCurrentlyTaken = targetMed.status === "taken";
+    const newStatus = isCurrentlyTaken ? "pending" : "taken";
+    const nowIso = new Date().toISOString();
+    const lastTakenStr = isCurrentlyTaken
+      ? undefined
+      : `Today, ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+
+    // Optimistic state update for immediate elder feedback
     setMedications((prev) =>
       prev.map((med) => {
         if (med.id === id) {
-          const isCurrentlyTaken = med.status === "taken";
-          const newStatus = isCurrentlyTaken ? "pending" : "taken";
-          const lastTaken = isCurrentlyTaken
-            ? undefined
-            : `Today, ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
-
-          if (!isCurrentlyTaken) {
-            showToast(`✓ Marked ${med.name} ${med.dosage} as Taken! Great job.`);
-          } else {
-            showToast(`Returned ${med.name} ${med.dosage} to scheduled.`);
-          }
           return {
             ...med,
             status: newStatus,
-            lastTaken,
+            lastTaken: lastTakenStr,
           };
         }
         return med;
       })
     );
+
+    if (!isCurrentlyTaken) {
+      showToast(`✓ Marked ${targetMed.name} ${targetMed.dosage} as Taken! Great job.`);
+    } else {
+      showToast(`Returned ${targetMed.name} ${targetMed.dosage} to scheduled.`);
+    }
+
+    // Persist to Supabase if authenticated
+    if (user && targetMed.scheduledFor) {
+      try {
+        const supabase = createClient();
+        await supabase.from("medication_dose_logs").upsert(
+          {
+            medication_id: targetMed.id,
+            patient_id: user.id,
+            scheduled_for: targetMed.scheduledFor,
+            status: newStatus,
+            taken_at: isCurrentlyTaken ? null : nowIso,
+            updated_at: nowIso,
+          },
+          { onConflict: "medication_id,scheduled_for" }
+        );
+      } catch (err) {
+        console.warn("Error persisting dose log:", err);
+      }
+    }
   };
 
-  const handleSnooze = (id: string) => {
+  // Snooze Dose by 10 minutes
+  const handleSnooze = async (id: string) => {
+    const targetMed = medications.find((m) => m.id === id);
+    if (!targetMed) return;
+
+    // Phase 3 requirement: Snooze defers reminder by 10 minutes
+    const snoozeMs = 10 * 60 * 1000;
+    const snoozedUntilDate = new Date(Date.now() + snoozeMs);
+    const snoozedUntilIso = snoozedUntilDate.toISOString();
+    const nextTimeStr = snoozedUntilDate.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Optimistic UI update
     setMedications((prev) =>
       prev.map((med) => {
         if (med.id === id) {
-          const nextTime = new Date(Date.now() + 15 * 60 * 1000).toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          showToast(`⏰ Snoozed ${med.name}. Reminder scheduled locally for ${nextTime}.`);
-          return { ...med, status: "snoozed" };
+          return {
+            ...med,
+            status: "snoozed",
+            snoozedUntil: `Snoozed until ${nextTimeStr}`,
+          };
         }
         return med;
       })
     );
+
+    showToast(`⏰ Snoozed ${targetMed.name}. Reminder scheduled for ${nextTimeStr}.`);
+
+    // Persist to Supabase if authenticated
+    if (user && targetMed.scheduledFor) {
+      try {
+        const supabase = createClient();
+        await supabase.from("medication_dose_logs").upsert(
+          {
+            medication_id: targetMed.id,
+            patient_id: user.id,
+            scheduled_for: targetMed.scheduledFor,
+            status: "snoozed",
+            snoozed_until: snoozedUntilIso,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "medication_id,scheduled_for" }
+        );
+      } catch (err) {
+        console.warn("Error persisting snooze:", err);
+      }
+    }
   };
 
   const handleOpenHelp = (medication: Medication) => {
     setHelpMed(medication);
   };
 
-  const handleHelpRequested = (reason: string) => {
+  // Log Need Help action
+  const handleHelpRequested = async (reason: string) => {
     const contactName = activePatient.emergencyContact.name;
     const phone = activePatient.emergencyContact.phone;
+
     if (phone && phone !== "None configured") {
-      showToast(`Assistance note recorded locally: "${reason}". Contact ${contactName} if urgent.`);
+      showToast(`Assistance note recorded: "${reason}". Please call ${contactName} if urgent.`);
     } else {
-      showToast(`Assistance note recorded locally: "${reason}". National helpline 112 is available.`);
+      showToast(`Assistance note recorded: "${reason}". National helpline (112) is available.`);
+    }
+
+    if (user && helpMed && helpMed.scheduledFor) {
+      try {
+        const supabase = createClient();
+        await supabase.from("medication_dose_logs").upsert(
+          {
+            medication_id: helpMed.id,
+            patient_id: user.id,
+            scheduled_for: helpMed.scheduledFor,
+            status: "need_help",
+            note: reason,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "medication_id,scheduled_for" }
+        );
+
+        // Update local state
+        setMedications((prev) =>
+          prev.map((m) => (m.id === helpMed.id ? { ...m, status: "need_help" } : m))
+        );
+      } catch (err) {
+        console.warn("Error persisting need help note:", err);
+      }
     }
   };
 
@@ -126,14 +288,15 @@ export default function MyDayDashboard() {
   };
 
   const takenCount = medications.filter((m) => m.status === "taken").length;
-  const currentWeeklyPercentage = Math.round(
-    ((DEMO_ADHERENCE.takenThisWeek + (takenCount - 2)) / DEMO_ADHERENCE.totalScheduledThisWeek) * 100
-  );
+  const currentWeeklyPercentage = medications.length > 0
+    ? Math.round((takenCount / medications.length) * 100)
+    : 100;
 
   const dynamicStats: AdherenceStats = {
     ...DEMO_ADHERENCE,
-    weeklyPercentage: Math.min(100, Math.max(0, currentWeeklyPercentage)),
-    takenThisWeek: DEMO_ADHERENCE.takenThisWeek + (takenCount - 2),
+    takenToday: takenCount,
+    totalScheduledToday: medications.length,
+    weeklyPercentage: currentWeeklyPercentage,
   };
 
   return (
@@ -151,30 +314,35 @@ export default function MyDayDashboard() {
           </div>
         )}
 
-        {/* Phase 2 Context Banner */}
+        {/* Phase 3 Context Banner */}
         <div className="border-b border-slate-200 bg-teal-50/60 dark:border-slate-800 dark:bg-slate-900/60">
           <div className="mx-auto flex max-w-7xl flex-col sm:flex-row sm:items-center justify-between gap-1.5 px-4 py-2.5 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-2">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-bold text-teal-800 dark:text-teal-400">Phase 2:</span>
+              <span className="font-bold text-teal-800 dark:text-teal-400">Phase 3:</span>
               {user ? (
-                <span>Signed in as <strong className="text-slate-900 dark:text-white">{activePatient.name}</strong>. Personal profile active.</span>
+                <span>Signed in as <strong className="text-slate-900 dark:text-white">{activePatient.name}</strong>. Daily doses are synced to your database.</span>
               ) : (
-                <span>Exploring with demo profile. Routine updates are kept in session memory.</span>
+                <span>Exploring in demo mode. Add or track real prescriptions by signing in.</span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+            <div className="flex items-center gap-3 text-[11px] text-slate-500">
+              <Link
+                href="/medications"
+                className="text-teal-700 dark:text-teal-400 font-bold hover:underline flex items-center gap-1"
+              >
+                <Pill className="h-3.5 w-3.5" /> Manage Medications
+              </Link>
+              <span>•</span>
               {user ? (
                 <Link href="/profile" className="text-teal-700 dark:text-teal-400 font-bold hover:underline flex items-center gap-1">
-                  <User className="h-3 w-3" /> Edit Healthcare Profile
+                  <User className="h-3 w-3" /> Profile
                 </Link>
               ) : (
                 <Link href="/login" className="text-teal-700 dark:text-teal-400 font-bold hover:underline flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> Sign in for personal profile
+                  <Sparkles className="h-3 w-3" /> Sign In
                 </Link>
               )}
-              <span>•</span>
-              <span>Medication database persistence arrives in Phase 3</span>
             </div>
           </div>
         </div>
@@ -187,6 +355,31 @@ export default function MyDayDashboard() {
             takenCount={takenCount}
             totalCount={medications.length}
           />
+
+          {/* Empty Medication Prescriptions State for Authenticated Users */}
+          {user && !isLoadingMeds && userDbMeds.length === 0 && (
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center shrink-0">
+                  <Pill className="h-7 w-7" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    You haven&apos;t added any medicines yet
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    Add your daily prescriptions to see your personal morning, afternoon, and evening routine here.
+                  </p>
+                </div>
+              </div>
+              <Link href="/medications" className="shrink-0">
+                <Button className="h-12 px-6 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Medicines</span>
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* Senior Primary Experience: 2-Column Responsive Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -222,6 +415,7 @@ export default function MyDayDashboard() {
           isOpen={Boolean(helpMed)}
           onClose={() => setHelpMed(null)}
           onHelpRequested={handleHelpRequested}
+          patient={activePatient}
         />
       </div>
     </Suspense>

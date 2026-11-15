@@ -39,7 +39,37 @@ export interface UserProfile {
   createdAt: string;
 }
 
-export type MedicationStatus = "scheduled" | "taken" | "missed" | "pending" | "snoozed";
+// Database schema types for Phase 3
+export interface DbMedication {
+  id: string;
+  patient_id: string;
+  name: string;
+  dosage: string;
+  instructions: string | null;
+  start_date: string;
+  end_date: string | null;
+  scheduled_times: string[];
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type DoseLogStatus = "pending" | "taken" | "snoozed" | "need_help";
+
+export interface DbMedicationDoseLog {
+  id: string;
+  medication_id: string;
+  patient_id: string;
+  scheduled_for: string; // ISO timestamptz
+  status: DoseLogStatus;
+  taken_at: string | null;
+  snoozed_until: string | null;
+  note: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type MedicationStatus = "scheduled" | "taken" | "missed" | "pending" | "snoozed" | "need_help";
 export type TimeSlot = "morning" | "afternoon" | "evening" | "night";
 
 export interface Medication {
@@ -57,6 +87,8 @@ export interface Medication {
   status: MedicationStatus;
   lastTaken?: string;
   snoozedUntil?: string;
+  doseLogId?: string; // Phase 3 Supabase log reference
+  scheduledFor?: string; // ISO string
   createdAt: string;
 }
 
@@ -98,15 +130,22 @@ export interface AlertNotification {
   createdAt: string;
 }
 
+export interface DailyProgressItem {
+  day: string;
+  percentage: number;
+  allTaken: boolean;
+  taken?: number;
+  total?: number;
+  completed?: boolean;
+}
+
 export interface AdherenceStats {
-  weeklyPercentage: number;
-  currentStreakDays: number;
+  takenToday?: number;
+  totalScheduledToday?: number;
   takenThisWeek: number;
-  missedThisWeek: number;
   totalScheduledThisWeek: number;
-  dailyProgress: {
-    day: string;
-    percentage: number;
-    allTaken: boolean;
-  }[];
+  currentStreakDays: number;
+  weeklyPercentage: number;
+  missedThisWeek?: number;
+  dailyProgress?: DailyProgressItem[];
 }

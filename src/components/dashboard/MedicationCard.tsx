@@ -108,9 +108,15 @@ export function MedicationCard({
                 </Badge>
               )}
               {isSnoozed && (
-                <Badge variant="secondary" className="gap-1 font-bold text-purple-700 bg-purple-100">
+                <Badge variant="secondary" className="gap-1 font-bold text-purple-700 bg-purple-100 dark:bg-purple-950 dark:text-purple-300">
                   <Clock className="h-3 w-3" />
-                  Snoozed (Next in 15 mins)
+                  {medication.snoozedUntil || "Snoozed (10 mins)"}
+                </Badge>
+              )}
+              {medication.status === "need_help" && (
+                <Badge variant="danger" className="gap-1 font-bold">
+                  <HelpCircle className="h-3 w-3" />
+                  Assistance Logged
                 </Badge>
               )}
               {!isTaken && !isPending && !isSnoozed && (
@@ -193,7 +199,7 @@ export function MedicationCard({
               className="min-h-[48px] px-4 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl gap-1.5 border-slate-300"
             >
               <Clock className="h-4 w-4 text-slate-500" />
-              Snooze 15 min
+              Snooze 10 min
             </Button>
           )}
         </div>

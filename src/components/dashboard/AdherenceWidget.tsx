@@ -59,29 +59,31 @@ export function AdherenceWidget({ stats }: AdherenceWidgetProps) {
         </div>
 
         {/* 7-Day Visual Mini Bar */}
-        <div className="space-y-1.5 pt-1">
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-            7-Day Routine History
-          </span>
-          <div className="grid grid-cols-7 gap-1.5 text-center">
-            {stats.dailyProgress.map((day) => (
-              <div key={day.day} className="space-y-1">
-                <div
-                  className={`w-full rounded-md flex items-end justify-center pb-1 transition-all ${
-                    day.allTaken
-                      ? "bg-teal-500 text-white font-bold text-[11px]"
-                      : "bg-teal-300 text-slate-900 font-bold text-[11px]"
-                  }`}
-                  style={{ height: `${Math.max(28, (day.percentage / 100) * 44)}px` }}
-                  title={`${day.day}: ${day.percentage}% complete`}
-                >
-                  ✓
+        {stats.dailyProgress && stats.dailyProgress.length > 0 && (
+          <div className="space-y-1.5 pt-1">
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+              7-Day Routine History
+            </span>
+            <div className="grid grid-cols-7 gap-1.5 text-center">
+              {stats.dailyProgress.map((day) => (
+                <div key={day.day} className="space-y-1">
+                  <div
+                    className={`w-full rounded-md flex items-end justify-center pb-1 transition-all ${
+                      day.allTaken
+                        ? "bg-teal-500 text-white font-bold text-[11px]"
+                        : "bg-teal-300 text-slate-900 font-bold text-[11px]"
+                    }`}
+                    style={{ height: `${Math.max(28, (day.percentage / 100) * 44)}px` }}
+                    title={`${day.day}: ${day.percentage}% complete`}
+                  >
+                    ✓
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500">{day.day}</span>
                 </div>
-                <span className="text-[10px] font-bold text-slate-500">{day.day}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

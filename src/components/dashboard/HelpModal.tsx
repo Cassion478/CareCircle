@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { HelpCircle, Check, X, PhoneCall, MessageSquareHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Medication } from "@/types";
+import { Medication, UserProfile } from "@/types";
 import { DEMO_PATIENT } from "@/lib/demo-data";
 
 interface HelpModalProps {
@@ -11,20 +11,31 @@ interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onHelpRequested: (reason: string) => void;
+  patient?: UserProfile;
 }
 
-export function HelpModal({ medication, isOpen, onClose, onHelpRequested }: HelpModalProps) {
+export function HelpModal({
+  medication,
+  isOpen,
+  onClose,
+  onHelpRequested,
+  patient = DEMO_PATIENT,
+}: HelpModalProps) {
   const [selectedReason, setSelectedReason] = useState<string>("");
   const [submitted, setSubmitted] = useState<boolean>(false);
 
   if (!isOpen || !medication) return null;
+
+  const contactName = patient.emergencyContact?.name || "Family";
+  const contactPhone = patient.emergencyContact?.phone;
+  const hasPhone = Boolean(contactPhone && contactPhone !== "None configured");
 
   const reasons = [
     "I'm unsure if I already took this dose today",
     "I'm feeling dizzy or unwell after my dose",
     "I dropped or misplaced my tablet",
     "I'm having trouble opening the medication container",
-    "I want to speak with Pooja before taking this",
+    `I want to speak with ${contactName} before taking this`,
   ];
 
   const handleSubmit = () => {
@@ -35,7 +46,7 @@ export function HelpModal({ medication, isOpen, onClose, onHelpRequested }: Help
       setSubmitted(false);
       setSelectedReason("");
       onClose();
-    }, 2200);
+    }, 2000);
   };
 
   return (
@@ -74,14 +85,18 @@ export function HelpModal({ medication, isOpen, onClose, onHelpRequested }: Help
               <Check className="h-8 w-8" />
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Assistance Note Logged Locally
+              Assistance Note Recorded
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-sm">
-              Your note has been saved in local demo history. In Phase 5 (Smart Alerts), this triggers an automated SMS and email to {DEMO_PATIENT.emergencyContact.name}.
+              Your note has been saved to your medication log. Please call {contactName} directly if you need immediate assistance.
             </p>
           </div>
         ) : (
           <div className="space-y-4 my-5">
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 p-3 rounded-xl text-xs text-amber-900 dark:text-amber-200">
+              <strong>Notice:</strong> This logs an assistance note in your healthcare record. It is not an automated medical emergency dispatch.
+            </div>
+
             <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
               What do you need help with?
             </p>
@@ -89,6 +104,7 @@ export function HelpModal({ medication, isOpen, onClose, onHelpRequested }: Help
             <div className="space-y-2">
               {reasons.map((reason) => (
                 <button
+                  type="button"
                   key={reason}
                   onClick={() => setSelectedReason(reason)}
                   className={`w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-between min-h-[44px] ${
@@ -116,13 +132,23 @@ export function HelpModal({ medication, isOpen, onClose, onHelpRequested }: Help
                 <MessageSquareHeart className="h-5 w-5 mr-2" />
                 Record Assistance Note
               </Button>
-              <a
-                href={`tel:${DEMO_PATIENT.emergencyContact.phone}`}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 min-h-[48px]"
-              >
-                <PhoneCall className="h-4 w-4 mr-2 text-teal-600" />
-                Call Pooja Directly
-              </a>
+              {hasPhone ? (
+                <a
+                  href={`tel:${contactPhone}`}
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 min-h-[48px]"
+                >
+                  <PhoneCall className="h-4 w-4 mr-2 text-teal-600" />
+                  Call {contactName}
+                </a>
+              ) : (
+                <a
+                  href="tel:112"
+                  className="inline-flex items-center justify-center rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs sm:text-sm font-bold text-rose-700 hover:bg-rose-100 min-h-[48px]"
+                >
+                  <PhoneCall className="h-4 w-4 mr-2 text-rose-600" />
+                  Call 112 (Helpline)
+                </a>
+              )}
             </div>
           </div>
         )}
