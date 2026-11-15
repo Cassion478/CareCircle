@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HelpCircle, Check, X, PhoneCall, MessageSquareHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Medication, UserProfile } from "@/types";
@@ -22,6 +22,19 @@ export function HelpModal({
 }: HelpModalProps) {
   const [selectedReason, setSelectedReason] = useState<string>("");
   const [submitted, setSubmitted] = useState<boolean>(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !medication) return null;
 
@@ -41,7 +54,8 @@ export function HelpModal({
     if (!selectedReason) return;
     onHelpRequested(selectedReason);
     setSubmitted(true);
-    setTimeout(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setSubmitted(false);
       setSelectedReason("");
       onClose();

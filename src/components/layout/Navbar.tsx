@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { getAvatarInitials } from "@/lib/care-circle";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -26,14 +27,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const displayName = profile?.fullName || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : null);
-  const initials = displayName
-    ? displayName
-        .split(" ")
-        .map((n: string) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
-    : "CC";
+  const initials = displayName ? getAvatarInitials(displayName) : "CC";
 
   const navLinks = [
     { href: "/my-day", label: "My Day", icon: SunMedium, matchPrefix: ["/my-day"] },
