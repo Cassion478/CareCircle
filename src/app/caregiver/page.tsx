@@ -35,48 +35,48 @@ export default function CaregiverPortalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-16 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#F8FAF8] pb-16">
       {/* Toast Notification */}
       {nudgeToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-bold text-white shadow-2xl ring-1 ring-white/20 animate-in slide-in-from-bottom-5 duration-200 dark:bg-white dark:text-slate-900">
-          <CheckCircle2 className="h-5 w-5 text-teal-400 dark:text-teal-600" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl bg-[#26352E] px-5 py-3.5 text-sm font-bold text-white shadow-2xl ring-1 ring-white/20 animate-in slide-in-from-bottom-5 duration-200">
+          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
           <span>Warm reminder notification scheduled for {DEMO_PATIENT.name}&apos;s tablet!</span>
         </div>
       )}
 
       {/* Header Bar */}
-      <div className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="border-b border-[#E3EAE5] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-teal-700 dark:text-slate-300 dark:hover:text-teal-400"
+            href="/my-day"
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#66736B] hover:text-[#26352E]"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Elderly &ldquo;My Day&rdquo; Experience
+            Back to Elderly &ldquo;My Day&rdquo; Routine
           </Link>
-          <Badge variant="secondary">Supporting Family Portal (Phase 2 Demo)</Badge>
+          <Badge variant="secondary">Family Caregiver Portal</Badge>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 pt-6 sm:px-6 lg:px-8">
         {/* Caregiver Status Banner */}
-        <div className="rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-teal-50 p-6 shadow-sm dark:border-teal-900 dark:bg-slate-900">
+        <div className="rounded-2xl border border-[#C8D9CD] bg-linear-to-r from-[#EAF2EC] via-white to-[#EAF2EC] p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge variant="default" className="font-bold">
-                  <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Supporting Family Circle
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1 text-[#477A62]" /> Supporting Family Circle
                 </Badge>
-                <span className="text-xs text-slate-500">Demonstration Overview</span>
+                <span className="text-xs text-[#66736B]">Demonstration Overview</span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#26352E]">
                 Supporting {DEMO_PATIENT.name} (Age {DEMO_PATIENT.age})
               </h1>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-xs sm:text-sm text-[#66736B]">
                 Primary Contact: {DEMO_PATIENT.emergencyContact.name} ({DEMO_PATIENT.emergencyContact.relationship}) • {DEMO_PATIENT.emergencyContact.phone}
               </p>
-              <p className="text-[11px] text-teal-700 dark:text-teal-400 font-medium pt-1">
-                Notice: This view displays simulated sample data. Live caregiver synchronization, invite codes, and permissions are scheduled for Phase 4.
+              <p className="text-xs text-[#477A62] font-medium pt-1">
+                Family Portal provides real-time visibility into medication adherence, doctor appointments, and check-in assistance.
               </p>
             </div>
 
@@ -86,14 +86,14 @@ export default function CaregiverPortalPage() {
                 size="md"
                 onClick={handleSendNudge}
                 disabled={nudgeSent}
-                className="gap-2 font-bold min-h-[44px]"
+                className="gap-2 font-bold min-h-[44px] border-[#D9E2DC] text-[#26352E] hover:bg-[#EAF2EC]"
               >
-                <Send className="h-4 w-4 text-teal-600" />
+                <Send className="h-4 w-4 text-[#477A62]" />
                 {nudgeSent ? "Gentle Nudge Sent ✓" : "Send Warm Reminder"}
               </Button>
               <a
                 href={`tel:${DEMO_PATIENT.phone}`}
-                className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-teal-700 min-h-[44px]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#477A62] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-[#3B6551] min-h-[44px]"
               >
                 <PhoneCall className="h-4 w-4" />
                 Call Mother

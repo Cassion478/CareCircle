@@ -420,8 +420,8 @@ export default function ProfilePage() {
     <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6">
       <div className="mb-6 flex items-center justify-between">
         <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-900 dark:text-teal-400 transition-colors"
+          href="/my-day"
+          className="inline-flex items-center gap-2 text-sm font-bold text-[#477A62] hover:text-[#3B6551] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Return to My Day Dashboard
@@ -429,29 +429,29 @@ export default function ProfilePage() {
 
         <button
           onClick={handleSignOut}
-          className="inline-flex items-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/50 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 transition-colors cursor-pointer"
         >
           <LogOut className="h-3.5 w-3.5" />
           Sign Out
         </button>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xl space-y-8">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E3EAE5] shadow-xl space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E3EAE5]">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-600 text-white font-extrabold text-2xl shadow-md">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#477A62] text-white font-extrabold text-2xl shadow-md">
               {currentFullName ? currentFullName.slice(0, 2).toUpperCase() : "PT"}
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950 text-xs font-bold text-teal-700 dark:text-teal-300 mb-1">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#EAF2EC] text-xs font-bold text-[#26352E] border border-[#C8D9CD] mb-1">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#477A62]" />
                 Active Healthcare Account
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#26352E]">
                 {currentFullName || "Patient Profile"}
               </h1>
-              <p className="text-xs text-slate-500">{user.email}</p>
+              <p className="text-xs text-[#66736B]">{user.email}</p>
             </div>
           </div>
         </div>

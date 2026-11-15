@@ -12,7 +12,7 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     "";
 
-  // If Supabase is not yet configured, allow request through gracefully
+  // If Supabase is not yet configured, gracefully direct root to /login
   if (
     !supabaseUrl ||
     !supabaseKey ||
@@ -20,6 +20,11 @@ export async function updateSession(request: NextRequest) {
     supabaseKey.includes("your-anon") ||
     supabaseKey.includes("your-publishable")
   ) {
+    if (request.nextUrl.pathname === "/") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
     return supabaseResponse;
   }
 
@@ -47,18 +52,44 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Protect /profile route - redirect to /login if unauthenticated
-  if (!user && pathname.startsWith("/profile")) {
+  const protectedRoutes = [
+    "/my-day",
+    "/medications",
+    "/appointments",
+    "/care-circle",
+    "/alerts",
+    "/analytics",
+    "/profile",
+  ];
+
+  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+
+  // Protect all patient routes - redirect to /login if unauthenticated
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(url);
   }
 
+  // Redirect unauthenticated visitor from root `/` to `/login`
+  if (!user && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect authenticated user from root `/` to `/my-day`
+  if (user && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/my-day";
+    return NextResponse.redirect(url);
+  }
+
   // Redirect authenticated user away from login & register pages
   if (user && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/my-day";
     return NextResponse.redirect(url);
   }
 

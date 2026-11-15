@@ -1,8 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
+  /* CareCircle Warm Light Healthcare Theme */
+  --background: #F8FAF8;
+  --foreground: #26352E;
+
+  --card: #FFFFFF;
+  --card-foreground: #26352E;
+
+  --primary: #477A62;
+  --primary-hover: #3B6551;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #EAF2EC;
+  --secondary-hover: #DCE8DF;
+  --secondary-foreground: #26352E;
+
+  --muted: #F0F4F1;
+  --muted-foreground: #66736B;
+
+  --accent: #EAF2EC;
+  --accent-foreground: #26352E;
+
+  --border: #E3EAE5;
+  --border-subtle: #EDF2EE;
+
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+
+  --warning: #B45309;
+  --warning-surface: #FEF3C7;
+
+  --ring: #477A62;
+  --radius: 1rem;
 }
 
 @theme inline {
@@ -12,15 +42,28 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-  }
+/* Explicit default to light, warm healthcare background across all displays */
+html {
+  background-color: #F8FAF8;
+  color: #26352E;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: #F8FAF8;
+  color: #26352E;
   font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* High contrast touch targets for seniors */
+button, a {
+  -webkit-tap-highlight-color: transparent;
 }

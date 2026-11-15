@@ -270,20 +270,20 @@ function MedicationsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-16 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#F8FAF8] pb-16">
       {/* Top Breadcrumb & Header Bar */}
-      <div className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="border-b border-[#E3EAE5] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 hover:text-teal-900 dark:text-teal-400 transition-colors"
+            href="/my-day"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#477A62] hover:text-[#3B6551] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to My Day Dashboard
           </Link>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-950 dark:text-teal-300">
-              Phase 3: Persistent Regimens
+            <span className="inline-flex items-center rounded-full bg-[#EAF2EC] px-3.5 py-1 text-xs font-bold text-[#26352E] border border-[#C8D9CD]">
+              Prescription Records
             </span>
           </div>
         </div>
@@ -291,16 +291,16 @@ function MedicationsContent() {
 
       <div className="mx-auto max-w-7xl space-y-8 px-4 pt-6 sm:px-6 lg:px-8">
         {/* Title & Action Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-[#E3EAE5] shadow-sm">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#477A62] uppercase tracking-wider">
               <Pill className="h-4 w-4" />
               Medication Management
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#26352E]">
               My Medicine Schedule
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-base text-[#66736B]">
               Manage your daily medicines, dosages, and reminder times.
             </p>
           </div>
@@ -309,7 +309,7 @@ function MedicationsContent() {
             <Button
               onClick={openAddModal}
               size="lg"
-              className="h-13 px-6 text-base font-bold bg-teal-600 hover:bg-teal-500 text-white rounded-2xl shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0"
+              className="h-13 px-6 text-base font-bold bg-[#477A62] hover:bg-[#3B6551] text-white rounded-2xl shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
             >
               <Plus className="h-5 w-5" />
               <span>Add New Medicine</span>
@@ -343,26 +343,26 @@ function MedicationsContent() {
 
         {/* Unauthenticated Mode Notice */}
         {!user && !authLoading && (
-          <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <Sparkles className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
               <div>
-                <h2 className="text-base font-bold text-amber-900 dark:text-amber-200">
+                <h2 className="text-base font-bold text-amber-900">
                   Viewing in Demonstration Mode
                 </h2>
-                <p className="text-sm text-amber-800/90 dark:text-amber-300/80 mt-1">
+                <p className="text-sm text-amber-800/90 mt-1">
                   You are previewing pre-configured demonstration medicines (Smt. Shanti Devi). Sign in or register to store and manage your own persistent medication regimen in Supabase.
                 </p>
               </div>
             </div>
             <div className="flex gap-2 shrink-0">
               <Link href="/login?redirectTo=/medications">
-                <Button className="bg-teal-600 hover:bg-teal-500 text-white font-bold h-11 px-5 rounded-xl">
+                <Button className="bg-[#477A62] hover:bg-[#3B6551] text-white font-bold h-11 px-5 rounded-xl">
                   Sign In
                 </Button>
               </Link>
               <Link href="/register">
-                <Button variant="outline" className="font-bold h-11 px-5 rounded-xl">
+                <Button variant="outline" className="font-bold h-11 px-5 rounded-xl border-[#D9E2DC]">
                   Register
                 </Button>
               </Link>
@@ -373,8 +373,8 @@ function MedicationsContent() {
         {/* Loading state */}
         {isLoading && (
           <div className="py-16 text-center space-y-3">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent mx-auto" />
-            <p className="text-sm font-semibold text-slate-500">Loading your medication list...</p>
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#477A62] border-t-transparent mx-auto" />
+            <p className="text-sm font-semibold text-[#66736B]">Loading your medication list...</p>
           </div>
         )}
 
@@ -382,10 +382,10 @@ function MedicationsContent() {
         {!isLoading && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Pill className="h-5 w-5 text-teal-600" />
+              <h2 className="text-xl font-bold text-[#26352E] flex items-center gap-2">
+                <Pill className="h-5 w-5 text-[#477A62]" />
                 <span>Active Medicines</span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF2EC] text-[#26352E] border border-[#C8D9CD]">
                   {user ? medications.length : DEMO_MEDICATIONS.length}
                 </span>
               </h2>
@@ -393,22 +393,22 @@ function MedicationsContent() {
 
             {/* If user is logged in but has no medications yet */}
             {user && medications.length === 0 && (
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="h-16 w-16 rounded-full bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center mx-auto">
+              <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-[#E3EAE5] space-y-4">
+                <div className="h-16 w-16 rounded-full bg-[#EAF2EC] text-[#477A62] flex items-center justify-center mx-auto">
                   <Pill className="h-8 w-8" />
                 </div>
                 <div className="max-w-md mx-auto space-y-1">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-lg font-bold text-[#26352E]">
                     No medications added yet
                   </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-[#66736B]">
                     Keep track of your pills, dosages, and timings by adding your daily prescriptions.
                   </p>
                 </div>
                 <Button
                   onClick={openAddModal}
                   size="lg"
-                  className="bg-teal-600 hover:bg-teal-500 text-white font-bold h-12 px-6 rounded-xl"
+                  className="bg-[#477A62] hover:bg-[#3B6551] text-white font-bold h-12 px-6 rounded-xl"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Medicine
