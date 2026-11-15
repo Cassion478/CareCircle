@@ -40,7 +40,7 @@ We follow a strict **Phase-Based Development + Pull Request** workflow:
 | Phase | Name | Focus | Status |
 | :--- | :--- | :--- | :--- |
 | **Phase 0** | **Repository Audit & Foundation** | Next.js, TypeScript, Tailwind, ESLint setup | **Completed** |
-| **Phase 1** | **UI Foundation & Dashboard** | Core dashboard, navigation, patient overview | Upcoming |
+| **Phase 1** | **UI Foundation & Dashboard** | Core "My Day" dashboard, accessible cards, adherence | **Completed** |
 | **Phase 2** | **Auth & Healthcare Profile** | Supabase integration, user roles & profile | Upcoming |
 | **Phase 3** | **Medication Management** | CRUD, scheduling, daily status tracking | Upcoming |
 | **Phase 4** | **Family & Appointments** | Appointments, family circles, invite codes | Upcoming |

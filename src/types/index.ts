@@ -2,23 +2,28 @@
 
 export type Role = "patient" | "caregiver" | "family_member";
 
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
+  age?: number;
   email: string;
   role: Role;
   phone?: string;
-  emergencyContact?: {
-    name: string;
-    relationship: string;
-    phone: string;
-  };
-  conditions?: string[];
-  allergies?: string[];
+  avatarUrl?: string;
+  emergencyContact: EmergencyContact;
+  conditions: string[];
+  allergies: string[];
   createdAt: string;
 }
 
-export type MedicationStatus = "scheduled" | "taken" | "missed" | "pending";
+export type MedicationStatus = "scheduled" | "taken" | "missed" | "pending" | "snoozed";
+export type TimeSlot = "morning" | "afternoon" | "evening" | "night";
 
 export interface Medication {
   id: string;
@@ -27,9 +32,14 @@ export interface Medication {
   dosage: string;
   frequency: string;
   times: string[]; // e.g. ["08:00", "20:00"]
-  instructions?: string;
+  timeSlot: TimeSlot;
+  timeLabel: string; // e.g. "8:00 AM"
+  instructions: string;
+  foodRequirement?: "with_food" | "before_food" | "after_food" | "empty_stomach";
+  pillColor?: string;
   status: MedicationStatus;
   lastTaken?: string;
+  snoozedUntil?: string;
   createdAt: string;
 }
 
@@ -41,8 +51,21 @@ export interface Appointment {
   date: string;
   time: string;
   location: string;
+  phone?: string;
   notes?: string;
   createdAt: string;
+}
+
+export interface Caregiver {
+  id: string;
+  name: string;
+  relationship: string;
+  role: "Primary Caregiver" | "Family Member" | "Home Health Aide";
+  phone: string;
+  email: string;
+  avatarInitials: string;
+  status: "Active" | "Away";
+  lastCheckIn?: string;
 }
 
 export interface AlertNotification {
@@ -56,4 +79,17 @@ export interface AlertNotification {
   isAcknowledged: boolean;
   acknowledgedBy?: string;
   createdAt: string;
+}
+
+export interface AdherenceStats {
+  weeklyPercentage: number;
+  currentStreakDays: number;
+  takenThisWeek: number;
+  missedThisWeek: number;
+  totalScheduledThisWeek: number;
+  dailyProgress: {
+    day: string;
+    percentage: number;
+    allTaken: boolean;
+  }[];
 }
