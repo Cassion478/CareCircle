@@ -92,6 +92,13 @@ export function Navbar() {
               <Users className="h-4 w-4 text-teal-600" />
               Care Circle
             </Link>
+            <Link
+              href="/alerts"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Bell className="h-4 w-4 text-teal-600" />
+              Alerts
+            </Link>
           </nav>
         </div>
 
@@ -99,18 +106,19 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {/* Phase Badge */}
           <div className="hidden sm:inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-950 dark:text-teal-300">
-            Phase 4: Family & Appointments
+            Phase 5: Smart Alerts
           </div>
 
           {/* Notification Icon */}
-          <div
+          <Link
+            href="/alerts"
             className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            title="Local Notifications"
-            aria-label="Local Notifications"
+            title="View Smart Alerts & Assistance"
+            aria-label="View Smart Alerts & Assistance"
           >
             <Bell className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-teal-600" />
-          </div>
+          </Link>
 
           {/* Active Profile Pill / Sign In */}
           {user ? (

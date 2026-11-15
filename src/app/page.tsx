@@ -8,6 +8,7 @@ import { MedicationTimeline } from "@/components/dashboard/MedicationTimeline";
 import { AppointmentsWidget } from "@/components/dashboard/AppointmentsWidget";
 import { AdherenceWidget } from "@/components/dashboard/AdherenceWidget";
 import { CareCircleWidget } from "@/components/dashboard/CareCircleWidget";
+import { AlertsWidget } from "@/components/dashboard/AlertsWidget";
 import { EmergencyModal } from "@/components/dashboard/EmergencyModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import {
@@ -17,13 +18,14 @@ import {
   DEMO_CAREGIVERS,
   DEMO_ADHERENCE,
 } from "@/lib/demo-data";
-import { Medication, AdherenceStats, UserProfile, DbMedication, Appointment, Caregiver } from "@/types";
+import { Medication, AdherenceStats, UserProfile, DbMedication, Appointment, Caregiver, DbAlert } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { buildTodaySchedule } from "@/lib/medications";
 import { mapDbToUiAppointment } from "@/lib/appointments";
 import { getAvatarInitials } from "@/lib/care-circle";
+import { DEMO_ALERTS } from "@/lib/alerts";
 
 export default function MyDayDashboard() {
   const { user, profile } = useAuth();
@@ -35,6 +37,7 @@ export default function MyDayDashboard() {
   const [isLoadingMeds, setIsLoadingMeds] = useState(false);
   const [userAppointments, setUserAppointments] = useState<Appointment[]>([]);
   const [userCaregivers, setUserCaregivers] = useState<Caregiver[]>([]);
+  const [userAlerts, setUserAlerts] = useState<DbAlert[]>([]);
 
   // Security & Data Isolation:
   // When logged in, strictly derive patient profile from authenticated user.
@@ -158,6 +161,21 @@ export default function MyDayDashboard() {
       } else {
         setUserCaregivers([]);
       }
+
+      // Fetch active alerts
+      const { data: alertData } = await supabase
+        .from("alerts")
+        .select("*")
+        .eq("patient_id", userId)
+        .in("status", ["pending", "snoozed"])
+        .order("scheduled_for", { ascending: false })
+        .limit(6);
+
+      if (alertData) {
+        setUserAlerts(alertData);
+      } else {
+        setUserAlerts([]);
+      }
     } catch (err) {
       console.warn("Error loading daily schedule:", err);
     } finally {
@@ -180,6 +198,7 @@ export default function MyDayDashboard() {
         setUserDbMeds([]);
         setUserAppointments([]);
         setUserCaregivers([]);
+        setUserAlerts(DEMO_ALERTS);
       }
     })();
 
@@ -187,6 +206,39 @@ export default function MyDayDashboard() {
       isCancelled = true;
     };
   }, [user, loadPersistentDoses]);
+
+  const handleAcknowledgeAlert = async (alertId: string) => {
+    if (!user) {
+      setUserAlerts((prev) =>
+        prev.map((a) =>
+          a.id === alertId
+            ? { ...a, status: "acknowledged", acknowledged_at: new Date().toISOString() }
+            : a
+        )
+      );
+      showToast("Alert marked acknowledged (Demo mode).");
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("alerts")
+        .update({
+          status: "acknowledged",
+          acknowledged_at: new Date().toISOString(),
+        })
+        .eq("id", alertId)
+        .eq("patient_id", user.id);
+
+      if (error) throw error;
+      showToast("Alert marked acknowledged.");
+      await loadPersistentDoses(user.id);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to acknowledge alert.";
+      console.warn(msg);
+    }
+  };
 
   // Mark Dose as Taken or Undo Taken
   const handleMarkTaken = async (id: string) => {
@@ -429,6 +481,12 @@ export default function MyDayDashboard() {
               </Link>
             </div>
           )}
+
+          {/* Active Smart Alerts Bar */}
+          <AlertsWidget
+            alerts={user ? userAlerts : DEMO_ALERTS}
+            onAcknowledge={handleAcknowledgeAlert}
+          />
 
           {/* Senior Primary Experience: 2-Column Responsive Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
