@@ -78,14 +78,20 @@ export function Navbar() {
               <Pill className="h-4 w-4 text-teal-600" />
               Medications
             </Link>
-            <span className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed">
-              <Calendar className="h-4 w-4" />
+            <Link
+              href="/appointments"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Calendar className="h-4 w-4 text-teal-600" />
               Appointments
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed">
-              <Users className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/care-circle"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Users className="h-4 w-4 text-teal-600" />
               Care Circle
-            </span>
+            </Link>
           </nav>
         </div>
 
@@ -93,7 +99,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {/* Phase Badge */}
           <div className="hidden sm:inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-950 dark:text-teal-300">
-            Phase 3: Medications
+            Phase 4: Family & Appointments
           </div>
 
           {/* Notification Icon */}

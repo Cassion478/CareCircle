@@ -17,11 +17,13 @@ import {
   DEMO_CAREGIVERS,
   DEMO_ADHERENCE,
 } from "@/lib/demo-data";
-import { Medication, AdherenceStats, UserProfile, DbMedication } from "@/types";
+import { Medication, AdherenceStats, UserProfile, DbMedication, Appointment, Caregiver } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { buildTodaySchedule } from "@/lib/medications";
+import { mapDbToUiAppointment } from "@/lib/appointments";
+import { getAvatarInitials } from "@/lib/care-circle";
 
 export default function MyDayDashboard() {
   const { user, profile } = useAuth();
@@ -31,6 +33,8 @@ export default function MyDayDashboard() {
   const [helpMed, setHelpMed] = useState<Medication | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLoadingMeds, setIsLoadingMeds] = useState(false);
+  const [userAppointments, setUserAppointments] = useState<Appointment[]>([]);
+  const [userCaregivers, setUserCaregivers] = useState<Caregiver[]>([]);
 
   // Security & Data Isolation:
   // When logged in, strictly derive patient profile from authenticated user.
@@ -59,7 +63,7 @@ export default function MyDayDashboard() {
         },
         conditions: [],
         allergies: profile?.allergies || [],
-        createdAt: profile?.createdAt || user.created_at || new Date().toISOString(),
+        createdAt: profile?.createdAt || user.created_at || "2026-11-15T00:00:00.000Z",
       }
     : DEMO_PATIENT;
 
@@ -111,6 +115,49 @@ export default function MyDayDashboard() {
         // User has no custom medications yet
         setMedications([]);
       }
+
+      // Fetch upcoming appointments
+      const todayDateStr = new Date().toISOString().split("T")[0];
+      const { data: aptData } = await supabase
+        .from("appointments")
+        .select("*")
+        .eq("patient_id", userId)
+        .gte("appointment_date", todayDateStr)
+        .eq("status", "scheduled")
+        .order("appointment_date", { ascending: true })
+        .order("appointment_time", { ascending: true })
+        .limit(5);
+
+      if (aptData) {
+        setUserAppointments(aptData.map(mapDbToUiAppointment));
+      } else {
+        setUserAppointments([]);
+      }
+
+      // Fetch active Care Circle members
+      const { data: memberData } = await supabase
+        .from("care_circle_members")
+        .select("*")
+        .eq("patient_id", userId)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (memberData) {
+        setUserCaregivers(
+          memberData.map((m) => ({
+            id: m.id,
+            name: m.member_name,
+            relationship: m.relationship,
+            role: m.role === "emergency_contact" ? "Primary Caregiver" : "Family Member",
+            phone: m.phone_number || "",
+            email: m.email || "",
+            avatarInitials: getAvatarInitials(m.member_name),
+            status: "Active",
+          }))
+        );
+      } else {
+        setUserCaregivers([]);
+      }
     } catch (err) {
       console.warn("Error loading daily schedule:", err);
     } finally {
@@ -131,6 +178,8 @@ export default function MyDayDashboard() {
         // Unauthenticated visitor: use demo medications in local state
         setMedications(DEMO_MEDICATIONS);
         setUserDbMeds([]);
+        setUserAppointments([]);
+        setUserCaregivers([]);
       }
     })();
 
@@ -396,8 +445,8 @@ export default function MyDayDashboard() {
             {/* Right 4 Cols: Consistency, Appointments & Family Circle */}
             <div className="lg:col-span-4 space-y-6">
               <AdherenceWidget stats={dynamicStats} />
-              <AppointmentsWidget appointments={DEMO_APPOINTMENTS} />
-              <CareCircleWidget caregivers={DEMO_CAREGIVERS} />
+              <AppointmentsWidget appointments={user ? userAppointments : DEMO_APPOINTMENTS} />
+              <CareCircleWidget caregivers={user ? userCaregivers : DEMO_CAREGIVERS} />
             </div>
           </div>
         </div>

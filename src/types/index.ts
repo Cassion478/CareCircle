@@ -149,3 +149,36 @@ export interface AdherenceStats {
   missedThisWeek?: number;
   dailyProgress?: DailyProgressItem[];
 }
+
+// Phase 4: Family Care Circle & Appointments Types
+export type CareCircleMemberRole = "caregiver" | "emergency_contact";
+export type CareCircleMemberStatus = "pending" | "active" | "revoked";
+
+export interface DbCareCircleMember {
+  id: string;
+  patient_id: string;
+  member_name: string;
+  relationship: string;
+  email: string | null;
+  phone_number: string | null;
+  role: CareCircleMemberRole;
+  status: CareCircleMemberStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
+
+export interface DbAppointment {
+  id: string;
+  patient_id: string;
+  title: string;
+  doctor_name: string | null;
+  location: string | null;
+  appointment_date: string;
+  appointment_time: string;
+  notes: string | null;
+  status: AppointmentStatus;
+  created_at: string;
+  updated_at: string;
+}
