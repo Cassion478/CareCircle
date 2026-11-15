@@ -212,3 +212,6 @@ export interface DbAlertPreferences {
   created_at: string;
   updated_at: string;
 }
+
+// Phase 8A: Multi-Channel Notification Infrastructure
+export * from "./notifications";

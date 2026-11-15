@@ -15,6 +15,10 @@ import {
   Phone,
   Settings,
   ShieldAlert,
+  Mail,
+  MessageSquare,
+  Smartphone,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +62,9 @@ function AlertsContent() {
   const [medReminders, setMedReminders] = useState(true);
   const [aptReminders, setAptReminders] = useState(true);
   const [assistEscalation, setAssistEscalation] = useState(true);
+  const [emailNotifs, setEmailNotifs] = useState(true);
+  const [smsNotifs, setSmsNotifs] = useState(false);
+  const [pushNotifs, setPushNotifs] = useState(false);
   const [preferredContactId, setPreferredContactId] = useState<string>("");
   const [isSavingPref, setIsSavingPref] = useState(false);
 
@@ -98,6 +105,23 @@ function AlertsContent() {
         setAptReminders(prefData.appointment_reminders);
         setAssistEscalation(prefData.assistance_escalation_enabled);
         setPreferredContactId(prefData.preferred_care_circle_contact_id || "");
+      }
+
+      // 2b. Fetch multi-channel notification preferences (Phase 8A)
+      try {
+        const { data: notifPrefData } = await supabase
+          .from("notification_preferences")
+          .select("*")
+          .eq("patient_id", userId)
+          .maybeSingle();
+
+        if (notifPrefData) {
+          setEmailNotifs(notifPrefData.email_enabled);
+          setSmsNotifs(notifPrefData.sms_enabled);
+          setPushNotifs(notifPrefData.push_enabled);
+        }
+      } catch {
+        // Table may not be queried if offline or unmigrated; keep defaults
       }
 
       // 3. Fetch active Care Circle contacts
@@ -342,6 +366,17 @@ function AlertsContent() {
       });
 
       if (error) throw error;
+
+      // Upsert notification_preferences (Phase 8A)
+      await supabase.from("notification_preferences").upsert(
+        {
+          patient_id: user.id,
+          email_enabled: emailNotifs,
+          sms_enabled: smsNotifs,
+          push_enabled: pushNotifs,
+        },
+        { onConflict: "patient_id" }
+      );
       setIsPrefModalOpen(false);
       showSuccess("Alert preferences updated.");
       await loadData(user.id);
@@ -880,6 +915,69 @@ function AlertsContent() {
                     className="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
                   />
                 </label>
+
+                {/* Multi-Channel Delivery Channels (Phase 8A Infrastructure) */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      External Notification Channels
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md dark:bg-teal-950 dark:text-teal-300">
+                      <Shield className="h-3 w-3 text-teal-600" /> Privacy Protected
+                    </span>
+                  </div>
+
+                  <label className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-slate-500" />
+                      <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        Email Reminders
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={emailNotifs}
+                      onChange={(e) => setEmailNotifs(e.target.checked)}
+                      className="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-slate-500" />
+                      <div>
+                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                          SMS Alerts (India Compliant)
+                        </span>
+                        <p className="text-[11px] text-slate-500">Masked payload; requires explicit opt-in</p>
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={smsNotifs}
+                      onChange={(e) => setSmsNotifs(e.target.checked)}
+                      className="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="h-4 w-4 text-slate-500" />
+                      <div>
+                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                          Web Push Notifications
+                        </span>
+                        <p className="text-[11px] text-slate-500">Browser alerts when app is closed</p>
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={pushNotifs}
+                      onChange={(e) => setPushNotifs(e.target.checked)}
+                      className="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
+                    />
+                  </label>
+                </div>
               </div>
 
               {careCircleMembers.length > 0 && (
