@@ -13,7 +13,6 @@ import {
   Edit2,
   X,
   History,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { DbMedication, DbMedicationDoseLog } from "@/types";
 import { formatTimeLabel, validateMedication } from "@/lib/medications";
-import { DEMO_MEDICATIONS } from "@/lib/demo-data";
 
 const COMMON_TIMES = [
   { label: "Morning", time: "08:00" },
@@ -31,7 +29,7 @@ const COMMON_TIMES = [
 ];
 
 function MedicationsContent() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [medications, setMedications] = useState<DbMedication[]>([]);
   const [doseLogs, setDoseLogs] = useState<DbMedicationDoseLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -341,35 +339,6 @@ function MedicationsContent() {
           </div>
         )}
 
-        {/* Unauthenticated Mode Notice */}
-        {!user && !authLoading && (
-          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
-              <div>
-                <h2 className="text-base font-bold text-amber-900">
-                  Viewing in Demonstration Mode
-                </h2>
-                <p className="text-sm text-amber-800/90 mt-1">
-                  You are previewing pre-configured demonstration medicines (Smt. Shanti Devi). Sign in or register to store and manage your own persistent medication regimen in Supabase.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <Link href="/login?redirectTo=/medications">
-                <Button className="bg-[#477A62] hover:bg-[#3B6551] text-white font-bold h-11 px-5 rounded-xl">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button variant="outline" className="font-bold h-11 px-5 rounded-xl border-[#D9E2DC]">
-                  Register
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
-
         {/* Loading state */}
         {isLoading && (
           <div className="py-16 text-center space-y-3">
@@ -386,13 +355,13 @@ function MedicationsContent() {
                 <Pill className="h-5 w-5 text-[#477A62]" />
                 <span>Active Medicines</span>
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF2EC] text-[#26352E] border border-[#C8D9CD]">
-                  {user ? medications.length : DEMO_MEDICATIONS.length}
+                  {medications.length}
                 </span>
               </h2>
             </div>
 
-            {/* If user is logged in but has no medications yet */}
-            {user && medications.length === 0 && (
+            {/* If user has no medications yet */}
+            {medications.length === 0 && (
               <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-[#E3EAE5] space-y-4">
                 <div className="h-16 w-16 rounded-full bg-[#EAF2EC] text-[#477A62] flex items-center justify-center mx-auto">
                   <Pill className="h-8 w-8" />
@@ -490,40 +459,6 @@ function MedicationsContent() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Unauthenticated Demo Grid */}
-            {!user && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {DEMO_MEDICATIONS.map((med) => (
-                  <div
-                    key={med.id}
-                    className="rounded-2xl p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                          {med.name}
-                        </h3>
-                        <p className="text-sm font-semibold text-teal-700 dark:text-teal-400">
-                          {med.dosage}
-                        </p>
-                      </div>
-                      <Badge variant="secondary">Demo</Badge>
-                    </div>
-
-                    <p className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl">
-                      {med.instructions}
-                    </p>
-
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500">
-                      <Clock className="h-3.5 w-3.5 text-teal-600" />
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{med.timeLabel}</span>
-                      <span>({med.timeSlot})</span>
                     </div>
                   </div>
                 ))}

@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,10 +27,9 @@ import {
   getAvatarInitials,
   COMMON_RELATIONSHIPS,
 } from "@/lib/care-circle";
-import { DEMO_CAREGIVERS } from "@/lib/demo-data";
 
 function CareCircleContent() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [members, setMembers] = useState<DbCareCircleMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -314,30 +312,6 @@ function CareCircleContent() {
           </div>
         )}
 
-        {/* Unauthenticated Demo Notice */}
-        {!user && !authLoading && (
-          <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
-              <div>
-                <h2 className="text-base font-bold text-amber-900 dark:text-amber-200">
-                  Preview Demonstration Mode
-                </h2>
-                <p className="text-sm text-amber-800 dark:text-amber-300 mt-1">
-                  You are previewing sample family contacts for Smt. Shanti Devi. Sign in to your
-                  patient account to manage and save your real Care Circle.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-500 transition-colors shadow-sm"
-            >
-              Sign In to Save
-            </Link>
-          </div>
-        )}
-
         {/* Honest Privacy & Access Disclosure */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5">
           <ShieldCheck className="h-5 w-5 text-teal-600 shrink-0 mt-0.5" />
@@ -354,7 +328,7 @@ function CareCircleContent() {
           </div>
         </div>
 
-        {/* Content Section: Authenticated vs Demo */}
+        {/* Content Section: Contacts List */}
         {isLoading ? (
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-600 border-r-transparent mb-3" />
@@ -362,7 +336,7 @@ function CareCircleContent() {
               Loading your trusted family network...
             </p>
           </div>
-        ) : user ? (
+        ) : (
           <div>
             {members.length === 0 ? (
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 sm:p-14 text-center border border-dashed border-slate-300 dark:border-slate-800 space-y-4">
@@ -529,43 +503,6 @@ function CareCircleContent() {
                 })}
               </div>
             )}
-          </div>
-        ) : (
-          /* Demo Fallback Cards for Visitors */
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {DEMO_CAREGIVERS.map((cg) => (
-              <div
-                key={cg.id}
-                className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 shadow-sm space-y-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100 font-black text-teal-800 dark:bg-teal-950 dark:text-teal-200">
-                      {cg.avatarInitials}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white">{cg.name}</h3>
-                      <p className="text-xs text-slate-500">
-                        {cg.relationship} • {cg.role}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="text-[10px]">
-                    Demo
-                  </Badge>
-                </div>
-                <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-teal-600" />
-                    <span>{cg.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 text-teal-600" />
-                    <span>{cg.email}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </div>

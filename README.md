@@ -69,7 +69,7 @@ CareCircle inverts this paradigm:
 - 👨‍👩‍👧 **Family Care Circle:** Management of trusted emergency contacts and family liaisons with click-to-call (`tel:`) support and access revocation controls.
 - 🔔 **Smart Alerts & Escalation:** Automated detection of overdue doses and upcoming clinical visits, customizable reminder lead times, and assistance requests ("Need Help").
 - 📊 **Health & Routine Analytics:** Adherence rates calculated over 7-day, 30-day, and 90-day windows, consecutive streaks, and printable clinical summary reports.
-- 🤝 **Caregiver Demonstration Portal:** Public read-only demonstration mode allowing prospective caregivers to explore CareCircle workflows without exposing live patient records.
+- 🤝 **Caregiver Oversight Portal:** Authenticated caregiver dashboard allowing family members to monitor prescriptions, upcoming clinic visits, and care circle members.
 - 🔊 **Voice Read-Aloud Guidance:** Accessible Speech Synthesis that verbalizes today's medication routine at the touch of a button.
 
 ---
@@ -81,7 +81,7 @@ CareCircle was engineered following a strict **phase-by-phase, test-driven pull 
 | Phase | Title | Core Objective | Key Deliverables & Artifacts |
 | :--- | :--- | :--- | :--- |
 | **Phase 0** | **Foundation & Audit** | Clean environment, dependencies, and configuration setup. | Next.js 16 App Router, React 19, Tailwind CSS 4, ESLint 9, strict TypeScript configuration. |
-| **Phase 1** | **Elderly Dashboard** | "My Day" view, accessible UI primitives, read-aloud voice support. | Accessible Card, Button ($\ge 44\text{px}$), Badge, speech synthesis engine, and demo caregiver portal. |
+| **Phase 1** | **Elderly Dashboard** | "My Day" view, accessible UI primitives, read-aloud voice support. | Accessible Card, Button ($\ge 44\text{px}$), Badge, speech synthesis engine, and caregiver portal. |
 | **Phase 2** | **Auth & Profiles** | Secure authentication and persistent patient healthcare profiles. | Supabase Auth SSR, `public.profiles` table, signup database trigger, protected route middleware. |
 | **Phase 3** | **Medication CRUD** | Persistent medication scheduling and daily dose logs. | `public.medications`, `public.medication_logs`, dose state machine (Taken/Undo/Snooze), RLS policies. |
 | **Phase 4** | **Care Circle & Appts** | Family emergency contacts and doctor appointment management. | `public.care_circle_members`, `public.appointments`, click-to-call emergency links, appointment statuses. |
@@ -111,33 +111,33 @@ CareCircle was engineered following a strict **phase-by-phase, test-driven pull 
 ### High-Level System Architecture
 
 ```mermaid
-graph TD
-    Client["Elderly User / Browser Client<br/>(Desktop, Tablet, Mobile)"]
+flowchart TD
+    Client["Elderly User / Browser Client (Desktop, Tablet, Mobile)"]
 
     subgraph NextJS["Next.js 16 App Router (Vercel)"]
-        Middleware["Supabase Auth Middleware<br/>(Session Verification & Route Guard)"]
-        Pages["Patient Routes<br/>/my-day, /medications, /appointments,<br/>/care-circle, /alerts, /analytics, /profile"]
-        PublicPages["Public Routes<br/>/login, /register, /caregiver"]
-        UI["Accessible UI Primitives<br/>(Buttons >= 44px, High-Contrast Light Theme)"]
+        Middleware["Supabase Auth Middleware (Session Verification & Route Guard)"]
+        Pages["Patient Routes (/my-day, /medications, /appointments, /care-circle, /alerts, /analytics, /caregiver, /profile)"]
+        PublicPages["Public Routes (/login, /register)"]
+        UI["Accessible UI Primitives (Buttons >= 44px, High-Contrast Light Theme)"]
     end
 
     subgraph SupabasePlatform["Supabase Managed Cloud"]
-        AuthService["Supabase Auth (GoTrue)<br/>Email & Password Sessions / JWT"]
-        Postgres["PostgreSQL Database<br/>(RLS Enforced on All Tables)"]
+        AuthService["Supabase Auth (GoTrue) - Email & Password Sessions / JWT"]
+        Postgres["PostgreSQL Database (RLS Enforced on All Tables)"]
         ProfilesTable["public.profiles"]
         MedsTable["public.medications"]
         LogsTable["public.medication_logs"]
         ApptsTable["public.appointments"]
         ContactsTable["public.care_circle_members"]
-        AlertsTable["public.alerts & preferences"]
+        AlertsTable["public.alerts & alert_preferences"]
     end
 
-    Client -->|HTTPS Requests| Middleware
-    Middleware -->|Unauthenticated| PublicPages
-    Middleware -->|Authenticated| Pages
+    Client -->|"HTTPS Requests"| Middleware
+    Middleware -->|"Unauthenticated"| PublicPages
+    Middleware -->|"Authenticated"| Pages
     Pages --> UI
-    Pages -->|@supabase/ssr Client| AuthService
-    Pages -->|SQL via PostgREST with JWT| Postgres
+    Pages -->|"Supabase Client (SSR)"| AuthService
+    Pages -->|"SQL via PostgREST with JWT"| Postgres
     Postgres --> ProfilesTable
     Postgres --> MedsTable
     Postgres --> LogsTable
@@ -175,7 +175,7 @@ CareCircle/
 │   │   ├── analytics/page.tsx       # Health Analytics & clinical summary report
 │   │   ├── appointments/page.tsx    # Appointment scheduling & management
 │   │   ├── care-circle/page.tsx     # Family Care Circle contacts & emergency links
-│   │   ├── caregiver/page.tsx       # Public read-only demo caregiver portal
+│   │   ├── caregiver/page.tsx       # Authenticated family oversight caregiver portal
 │   │   ├── globals.css              # Light healthcare design tokens & CSS resets
 │   │   ├── layout.tsx               # Root layout (Navbar, Footer, Font definitions)
 │   │   ├── login/page.tsx           # Accessible 2-column login experience
@@ -302,7 +302,7 @@ erDiagram
     USERS ||--o{ ALERT_PREFERENCES : "configures"
 
     PROFILES {
-        uuid id PK,FK
+        uuid id PK "FK to auth.users"
         text full_name
         date date_of_birth
         text blood_group
@@ -440,16 +440,16 @@ erDiagram
 - **Truthful Empty State:** When 0 doses are scheduled or recorded, the system accurately displays *"No data available"* with a *"Not enough data"* badge (never a deceptive 100%).
 - Consecutive streak tracking and one-click printable clinical summary report.
 
-### 🤝 Caregiver Demo Portal (`/caregiver`)
-- Publicly accessible demonstration interface (`/caregiver`) for families evaluating CareCircle.
-- Strictly isolated: loads fictional demo records and never accesses authenticated patient tables.
+### 🤝 Caregiver Oversight Portal (`/caregiver`)
+- Authenticated caregiver oversight interface (`/caregiver`) for family members and authorized caregivers.
+- Protected by edge middleware; queries the authenticated user's prescriptions and clinical appointments.
 
 ---
 
 ## 13. Authentication, Authorization & Security
 
 1. **Session Management:** Secure cookie-based authentication powered by `@supabase/ssr`. Tokens are refreshed automatically without client-side exposure of refresh tokens.
-2. **Route Protection:** Server middleware protects `/my-day`, `/medications`, `/appointments`, `/care-circle`, `/alerts`, `/analytics`, and `/profile`. Unauthenticated visitors to `/` are directed to `/login`.
+2. **Route Protection:** Server middleware protects `/my-day`, `/medications`, `/appointments`, `/care-circle`, `/alerts`, `/analytics`, `/caregiver`, and `/profile`. Unauthenticated visitors to `/` are directed to `/login`.
 3. **Open Redirect Sanitization:** Redirect targets in `?redirect=` parameters are strictly sanitized:
    ```typescript
    function sanitizeRedirectUrl(url: string | null): string {

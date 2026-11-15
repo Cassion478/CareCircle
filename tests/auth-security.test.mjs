@@ -42,21 +42,19 @@ describe("Security Audit: Open Redirect Protection", () => {
 
 // 2. Test Patient Data Isolation & Derivation Logic
 describe("Security Audit: Patient Data Isolation", () => {
-  const DEMO_PATIENT = {
-    id: "demo-shanti-devi",
-    name: "Smt. Shanti Devi",
-    email: "shanti.devi@example.com",
-    role: "patient",
-    emergencyContact: {
-      name: "Pooja Sharma",
-      relationship: "Daughter",
-      phone: "+91 98201 45678",
-    },
-  };
-
   function deriveActivePatient(user, profile) {
     if (!user) {
-      return DEMO_PATIENT;
+      return {
+        id: "",
+        name: "Patient",
+        email: "",
+        role: "patient",
+        emergencyContact: {
+          name: "Primary Family Contact",
+          relationship: "Family Member",
+          phone: "None configured",
+        },
+      };
     }
     return {
       id: user.id,
@@ -80,11 +78,12 @@ describe("Security Audit: Patient Data Isolation", () => {
     };
   }
 
-  test("unauthenticated visitor receives Demo Patient data", () => {
+  test("unauthenticated visitor receives neutral fallback and zero demo data", () => {
     const patient = deriveActivePatient(null, null);
-    assert.equal(patient.id, "demo-shanti-devi");
-    assert.equal(patient.name, "Smt. Shanti Devi");
-    assert.equal(patient.emergencyContact.name, "Pooja Sharma");
+    assert.equal(patient.id, "");
+    assert.equal(patient.name, "Patient");
+    assert.equal(patient.emergencyContact.phone, "None configured");
+    assert.notEqual(patient.name, "Smt. Shanti Devi");
   });
 
   test("authenticated user NEVER leaks Demo Patient family contacts", () => {

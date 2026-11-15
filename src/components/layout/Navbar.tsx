@@ -18,7 +18,6 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { DEMO_PATIENT } from "@/lib/demo-data";
 import { useAuth } from "@/hooks/use-auth";
 
 export function Navbar() {
@@ -34,7 +33,7 @@ export function Navbar() {
         .slice(0, 2)
         .join("")
         .toUpperCase()
-    : "SD";
+    : "CC";
 
   const navLinks = [
     { href: "/my-day", label: "My Day", icon: SunMedium, matchPrefix: ["/my-day"] },
@@ -155,26 +154,17 @@ export function Navbar() {
             <div className="flex items-center gap-2 pl-2 border-l border-[#E3EAE5]">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#477A62] hover:bg-[#3B6551] text-white text-xs font-bold shadow-xs transition-colors min-h-[44px]"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#C8D9CD] text-[#26352E] hover:bg-[#EAF2EC] text-xs font-bold transition-colors min-h-[44px]"
               >
-                <LogIn className="h-4 w-4" />
+                <LogIn className="h-4 w-4 text-[#477A62]" />
                 <span>Sign In</span>
               </Link>
-
-              <div
-                className="hidden md:flex items-center gap-2 pl-1 text-left"
-                title="Exploring in public demo mode"
+              <Link
+                href="/register"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#477A62] hover:bg-[#3B6551] text-white text-xs font-bold shadow-xs transition-colors min-h-[44px]"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF2EC] text-xs font-bold text-[#26352E] border border-[#C8D9CD]">
-                  SD
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-bold text-[#26352E] leading-tight">
-                    {DEMO_PATIENT.name}
-                  </span>
-                  <span className="text-[10px] text-amber-700 font-semibold">Demo Mode</span>
-                </div>
-              </div>
+                <span>Create Account</span>
+              </Link>
             </div>
           )}
         </div>

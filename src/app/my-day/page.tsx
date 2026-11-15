@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { CheckCircle2, User, Sparkles, Pill, Plus } from "lucide-react";
+import { CheckCircle2, User, Pill, Plus } from "lucide-react";
 import { PatientHeader } from "@/components/dashboard/PatientHeader";
 import { MedicationTimeline } from "@/components/dashboard/MedicationTimeline";
 import { AppointmentsWidget } from "@/components/dashboard/AppointmentsWidget";
@@ -11,13 +11,6 @@ import { CareCircleWidget } from "@/components/dashboard/CareCircleWidget";
 import { AlertsWidget } from "@/components/dashboard/AlertsWidget";
 import { EmergencyModal } from "@/components/dashboard/EmergencyModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
-import {
-  DEMO_PATIENT,
-  DEMO_MEDICATIONS,
-  DEMO_APPOINTMENTS,
-  DEMO_CAREGIVERS,
-  DEMO_ADHERENCE,
-} from "@/lib/demo-data";
 import { Medication, AdherenceStats, UserProfile, DbMedication, Appointment, Caregiver, DbAlert } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -25,12 +18,11 @@ import { createClient } from "@/lib/supabase/client";
 import { buildTodaySchedule } from "@/lib/medications";
 import { mapDbToUiAppointment } from "@/lib/appointments";
 import { getAvatarInitials } from "@/lib/care-circle";
-import { DEMO_ALERTS } from "@/lib/alerts";
 
 export default function MyDayPage() {
   const { user, profile } = useAuth();
-  const [medications, setMedications] = useState<Medication[]>(DEMO_MEDICATIONS);
-  const [userDbMeds, setUserDbMeds] = useState<DbMedication[]>([]);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [, setUserDbMeds] = useState<DbMedication[]>([]);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [helpMed, setHelpMed] = useState<Medication | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -39,36 +31,32 @@ export default function MyDayPage() {
   const [userCaregivers, setUserCaregivers] = useState<Caregiver[]>([]);
   const [userAlerts, setUserAlerts] = useState<DbAlert[]>([]);
 
-  // Security & Data Isolation:
-  // When logged in, strictly derive patient profile from authenticated user.
-  // Never leak or mix demo patient details (Smt. Shanti Devi / Pooja) into an authenticated session.
-  const activePatient: UserProfile = user
-    ? {
-        id: user.id,
-        name: profile?.fullName || user.user_metadata?.full_name || "Patient",
-        email: user.email || "",
-        role: "patient",
-        phone: profile?.phoneNumber || user.user_metadata?.phone_number || undefined,
-        avatarUrl: profile?.avatarUrl || undefined,
-        emergencyContact: {
-          name:
-            profile?.emergencyContactName ||
-            user.user_metadata?.emergency_contact_name ||
-            "Primary Family Contact",
-          relationship:
-            profile?.emergencyContactRelationship ||
-            user.user_metadata?.emergency_contact_relationship ||
-            "Family Member",
-          phone:
-            profile?.emergencyContactPhone ||
-            user.user_metadata?.emergency_contact_phone ||
-            "None configured",
-        },
-        conditions: [],
-        allergies: profile?.allergies || [],
-        createdAt: profile?.createdAt || user.created_at || "2026-11-15T00:00:00.000Z",
-      }
-    : DEMO_PATIENT;
+  // Authenticated Patient Profile
+  const activePatient: UserProfile = {
+    id: user?.id || "",
+    name: profile?.fullName || user?.user_metadata?.full_name || "Patient",
+    email: user?.email || "",
+    role: "patient",
+    phone: profile?.phoneNumber || user?.user_metadata?.phone_number || undefined,
+    avatarUrl: profile?.avatarUrl || undefined,
+    emergencyContact: {
+      name:
+        profile?.emergencyContactName ||
+        user?.user_metadata?.emergency_contact_name ||
+        "Primary Family Contact",
+      relationship:
+        profile?.emergencyContactRelationship ||
+        user?.user_metadata?.emergency_contact_relationship ||
+        "Family Member",
+      phone:
+        profile?.emergencyContactPhone ||
+        user?.user_metadata?.emergency_contact_phone ||
+        "None configured",
+    },
+    conditions: [],
+    allergies: profile?.allergies || [],
+    createdAt: profile?.createdAt || user?.created_at || "2026-11-15T00:00:00.000Z",
+  };
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -193,12 +181,11 @@ export default function MyDayPage() {
       if (user) {
         await loadPersistentDoses(user.id);
       } else {
-        // Unauthenticated visitor: use demo medications in local state
-        setMedications(DEMO_MEDICATIONS);
+        setMedications([]);
         setUserDbMeds([]);
         setUserAppointments([]);
         setUserCaregivers([]);
-        setUserAlerts(DEMO_ALERTS);
+        setUserAlerts([]);
       }
     })();
 
@@ -216,7 +203,7 @@ export default function MyDayPage() {
             : a
         )
       );
-      showToast("Alert marked acknowledged (Demo mode).");
+      showToast("Alert marked acknowledged.");
       return;
     }
 
@@ -384,7 +371,7 @@ export default function MyDayPage() {
   };
 
   const handleSimulateAlert = () => {
-    showToast("🚨 Check-in alert recorded on local care circle board (Demo Mode).");
+    showToast("Check-in alert recorded on your care circle board.");
   };
 
   const takenCount = medications.filter((m) => m.status === "taken").length;
@@ -392,22 +379,15 @@ export default function MyDayPage() {
     ? Math.round((takenCount / medications.length) * 100)
     : null;
 
-  const dynamicStats: AdherenceStats = user && userDbMeds.length === 0
-    ? {
-        takenToday: 0,
-        totalScheduledToday: 0,
-        takenThisWeek: 0,
-        totalScheduledThisWeek: 0,
-        currentStreakDays: 0,
-        weeklyPercentage: null,
-        dailyProgress: [],
-      }
-    : {
-        ...DEMO_ADHERENCE,
-        takenToday: takenCount,
-        totalScheduledToday: medications.length,
-        weeklyPercentage: currentWeeklyPercentage,
-      };
+  const dynamicStats: AdherenceStats = {
+    takenToday: takenCount,
+    totalScheduledToday: medications.length,
+    takenThisWeek: takenCount,
+    totalScheduledThisWeek: medications.length,
+    currentStreakDays: medications.length > 0 && takenCount === medications.length ? 1 : 0,
+    weeklyPercentage: currentWeeklyPercentage,
+    dailyProgress: [],
+  };
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#F8FAF8] p-8 text-center text-[#66736B]">Loading CareCircle My Day...</div>}>
@@ -430,11 +410,7 @@ export default function MyDayPage() {
             <div className="flex items-center gap-2">
               <span className="flex h-2 w-2 rounded-full bg-[#477A62] animate-pulse" />
               <span className="font-bold text-[#26352E]">Daily Care Companion:</span>
-              {user ? (
-                <span>Personal schedule for <strong className="text-[#26352E]">{activePatient.name}</strong></span>
-              ) : (
-                <span>Exploring in demo mode (Smt. Shanti Devi). Sign in to personalize.</span>
-              )}
+              <span>Personal schedule for <strong className="text-[#26352E]">{activePatient.name}</strong></span>
             </div>
             <div className="flex items-center gap-3 text-xs text-[#66736B]">
               <Link
@@ -444,15 +420,9 @@ export default function MyDayPage() {
                 <Pill className="h-3.5 w-3.5" /> Manage Medications
               </Link>
               <span>•</span>
-              {user ? (
-                <Link href="/profile" className="text-[#477A62] font-bold hover:underline flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" /> My Profile
-                </Link>
-              ) : (
-                <Link href="/login" className="text-[#477A62] font-bold hover:underline flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5" /> Sign In
-                </Link>
-              )}
+              <Link href="/profile" className="text-[#477A62] font-bold hover:underline flex items-center gap-1">
+                <User className="h-3.5 w-3.5" /> My Profile
+              </Link>
             </div>
           </div>
         </div>
@@ -467,7 +437,7 @@ export default function MyDayPage() {
           />
 
           {/* Empty Medication Prescriptions State for Authenticated Users */}
-          {user && !isLoadingMeds && userDbMeds.length === 0 && (
+          {!isLoadingMeds && medications.length === 0 && (
             <div className="bg-white rounded-3xl p-8 border border-[#E3EAE5] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-2xl bg-[#EAF2EC] text-[#477A62] flex items-center justify-center shrink-0">
@@ -493,7 +463,7 @@ export default function MyDayPage() {
 
           {/* Active Smart Alerts Bar */}
           <AlertsWidget
-            alerts={user ? userAlerts : DEMO_ALERTS}
+            alerts={userAlerts}
             onAcknowledge={handleAcknowledgeAlert}
           />
 
@@ -512,8 +482,8 @@ export default function MyDayPage() {
             {/* Right 4 Cols: Consistency, Appointments & Family Circle */}
             <div className="lg:col-span-4 space-y-6">
               <AdherenceWidget stats={dynamicStats} />
-              <AppointmentsWidget appointments={user ? userAppointments : DEMO_APPOINTMENTS} />
-              <CareCircleWidget caregivers={user ? userCaregivers : DEMO_CAREGIVERS} />
+              <AppointmentsWidget appointments={userAppointments} />
+              <CareCircleWidget caregivers={userCaregivers} />
             </div>
           </div>
         </div>

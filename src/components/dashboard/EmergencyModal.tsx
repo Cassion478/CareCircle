@@ -3,26 +3,25 @@
 import Link from "next/link";
 import { AlertTriangle, Phone, PhoneCall, X, Heart, Shield, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DEMO_PATIENT } from "@/lib/demo-data";
 import { UserProfile } from "@/types";
 
 interface EmergencyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSimulateAlert: () => void;
-  patient?: UserProfile;
+  patient?: UserProfile | null;
 }
 
 export function EmergencyModal({
   isOpen,
   onClose,
   onSimulateAlert,
-  patient = DEMO_PATIENT,
+  patient,
 }: EmergencyModalProps) {
   if (!isOpen) return null;
 
   const hasEmergencyContact = Boolean(
-    patient.emergencyContact?.phone &&
+    patient?.emergencyContact?.phone &&
     patient.emergencyContact.phone !== "None configured"
   );
 
@@ -51,14 +50,14 @@ export function EmergencyModal({
               Immediate Help & Emergency
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              Direct assistance options for {patient.name}
+              Direct assistance options for {patient?.name || "Patient"}
             </p>
           </div>
         </div>
 
         <div className="space-y-4 my-5">
           {/* Primary Family Contact Option */}
-          {hasEmergencyContact ? (
+          {hasEmergencyContact && patient?.emergencyContact ? (
             <div className="rounded-2xl border-2 border-teal-500/40 bg-teal-50/70 p-4 dark:border-teal-800 dark:bg-teal-950/40">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -142,7 +141,7 @@ export function EmergencyModal({
             </div>
           </div>
 
-          {/* Notify Family Circle (Demo Simulation) */}
+          {/* Notify Family Circle */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
             <div className="flex items-center justify-between gap-3">
               <div>
