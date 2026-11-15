@@ -76,9 +76,15 @@ export function PatientHeader({
             You have completed <span className="font-bold text-white underline decoration-teal-400 decoration-2">{takenCount} of {totalCount}</span> routine steps today.
           </p>
 
-          <p className="text-xs text-teal-200/80">
-            Primary family contact: <span className="font-semibold text-white">{patient.emergencyContact.name}</span> ({patient.emergencyContact.phone})
-          </p>
+          {patient.emergencyContact?.phone && patient.emergencyContact.phone !== "None configured" ? (
+            <p className="text-xs text-teal-200/80">
+              Primary family contact: <span className="font-semibold text-white">{patient.emergencyContact.name}</span> ({patient.emergencyContact.phone})
+            </p>
+          ) : (
+            <p className="text-xs text-teal-200/80">
+              Emergency assistance: <span className="font-semibold text-white">National Helpline (112)</span> • Family contact not set
+            </p>
+          )}
         </div>
 
         {/* Right Column: Assistance Shortcut & Daily Wellbeing */}
